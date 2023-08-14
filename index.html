@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Chat Widget - by GPT 4</title>
+    <script src="./chatgpt-widget.js"></script>
+</head>
+<body class="bg-yellow-100" style="text-align: center;background-color: rgba(254,243,199);">
+    <div class="flex flex-col items-center p-8 justify-center w-5xl h-screen md:text-center md:w-3xl ">
+        <div>
+            <h1 class="text-2xl font-bold leading-relaxed">chatgpt-widget</h1>
+        </div>
+
+    <div class="pt-8">
+        <a href="https://github.com/hisune/chatgpt-widget"class="relative inline-block px-4 py-2 font-medium group">
+            <span class="absolute inset-0 w-full h-full transition duration-200 ease-out transform translate-x-1 translate-y-1 bg-black group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+            <span class="absolute inset-0 w-full h-full bg-white border-2 border-black group-hover:bg-black"></span>
+            <span class="relative text-black group-hover:text-white">GitHub Repo</span>
+        </a>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="https://hisune.com" target="_blank" class="relative inline-block px-4 py-2 font-medium group ml-8">
+            <span class="absolute inset-0 w-full h-full transition duration-200 ease-out transform translate-x-1 translate-y-1 bg-black group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+            <span class="absolute inset-0 w-full h-full bg-white border-2 border-black group-hover:bg-black"></span>
+            <span class="relative text-black group-hover:text-white">@hisune</span>
+        </a>
+    </div>
+    </div>
+    <script>
+        new chatgptWidget({
+            endpoint: 'https://opai.sockio.com/v1/chat/completions',
+            model: 'gpt-3.5-turbo',
+        });
+    </script>
+</body>
+</html>
