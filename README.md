@@ -3,7 +3,7 @@
 Quickly deploy chatgpt chat widget to your website!
 
 ### feature
-- easy to deploy
+- Easy to deploy
 - Support PC and mobile
 - Support custom openai domain name
 
