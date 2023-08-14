@@ -1,6 +1,6 @@
 <img src="https://github.com/hisune/chatgpt-widget/assets/7941669/2bae7c83-723d-4bb1-ac6b-801296db72ee" height="80" width="auto"/>
 
-One-click deployment of chatgpt to your website!
+Quickly deploy chatgpt chat widget to your website!
 
 ### feature
 - easy to deploy
