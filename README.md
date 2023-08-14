@@ -1,4 +1,4 @@
-<img src="https://github.com/hisune/chatgpt-widget/assets/7941669/d045ba25-0d94-44cd-bc10-feed61fb9101" height="80" width="auto"/>
+<img src="https://github.com/hisune/chatgpt-widget/assets/7941669/2bae7c83-723d-4bb1-ac6b-801296db72ee" height="80" width="auto"/>
 
 One-click deployment of chatgpt to your website!
 
@@ -8,8 +8,7 @@ One-click deployment of chatgpt to your website!
 - Support custom openai domain name
 
 ### screenshot
-![230814 145541](https://github.com/hisune/chatgpt-widget/assets/7941669/2b64e636-f2da-4650-8e9f-ad1f2bd49803)
-
+![230814 145541](https://github.com/hisune/chatgpt-widget/assets/7941669/c493645b-51df-47e3-a176-12da29b34314)
 
 ### usage
 Add js asset to html header tag.
