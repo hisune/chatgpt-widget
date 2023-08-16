@@ -6,13 +6,19 @@
     this._initial(opt);
   };
 
-  function extend(o,n,override) {
-    for(var key in n){
-      if(n.hasOwnProperty(key) && (!o.hasOwnProperty(key) || override)){
-        o[key]=n[key];
+  function extend(defaultOptions, newOptions) {
+    const mergedOptions = { ...defaultOptions, ...newOptions };
+
+    for (const key in newOptions) {
+      if (typeof newOptions[key] === 'object' && !Array.isArray(newOptions[key])) {
+        // Recursively merge nested objects
+        mergedOptions[key] = extend(defaultOptions[key], newOptions[key]);
+      } else {
+        // Update individual values
+        mergedOptions[key] = newOptions[key];
       }
     }
-    return o;
+    return mergedOptions;
   }
 
   chatgptWidget.prototype = {
@@ -21,11 +27,53 @@
       temperature: 0.7,
       model: 'gpt-4',
       max_history_size: 8,
-      title: 'Chat with AI',
-      welcome: 'Hello! How can I assist you today?'
+      language: {
+        title: 'Chat with AI',
+        welcome: 'Hello! How can I assist you today?',
+        send: 'Send',
+        clear: 'Clear',
+        placeholder: 'New lines(Ctrl+Enter)',
+        ago: {
+          days: 'days ago',
+          months: 'months ago',
+          years: 'years ago',
+          hours: 'hours ago',
+        }
+      },
+      theme:{
+        bubble: {
+          text_color: '--tw-text-opacity: 1; color: rgba(255, 255, 255, var(--tw-text-opacity))',
+          background_color: 'rgba(31, 41, 55)'
+        },
+        widget: {
+          background_color: 'rgba(255, 255, 255)',
+        },
+        title: {
+          text_color: 'rgba(255, 255, 255)',
+          background_color: 'rgba(31, 41, 55)'
+        },
+        user_message:{
+          text_color: 'rgba(255, 255, 255)',
+          background_color: 'rgba(31, 41, 55)'
+        },
+        bot_message:{
+          text_color: 'rgba(0, 0, 0)',
+          background_color: 'rgba(229,231,235)'
+        },
+        send_button:{
+          text_color: 'rgba(255, 255, 255)',
+          background_color: 'rgba(31, 41, 55)'
+        },
+        clear_button:{
+          text_color: 'rgba(0, 0, 0)',
+        },
+        time: {
+          text_color: 'rgba(0,0,0,.25)'
+        }
+      }
     },
     _initial: function(opt) {
-      this.def = extend(this.def, opt, true);
+      this.def = extend(this.def, opt);
 
       let that = this;
       setTimeout(function (){
@@ -83,10 +131,6 @@
         .chatgpt-widget-h-10 {
           height: 2.5rem;
         }
-        .chatgpt-widget-bg-gray-800 {
-          --tw-bg-opacity: 1;
-          background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
-        }
         .chatgpt-widget-rounded-full {
           border-radius: 9999px;
         }
@@ -109,10 +153,6 @@
         .chatgpt-widget-h-6 {
           height: 1.5rem;
         }
-        .chatgpt-widget-text-white {
-          --tw-text-opacity: 1;
-          color: rgba(255, 255, 255, var(--tw-text-opacity));
-        }
         .chatgpt-widget-absolute {
           position: absolute;
         }
@@ -124,10 +164,6 @@
         }
         .chatgpt-widget-w-96 {
           width: 24rem;
-        }
-        .chatgpt-widget-bg-white {
-          --tw-bg-opacity: 1;
-          background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
         }
         .chatgpt-widget-rounded-md {
           border-radius: 0.375rem;
@@ -190,7 +226,7 @@
         }
         .chatgpt-widget-border-gray-200 {
           --tw-border-opacity: 1;
-          border-color: rgba(229, 231, 235, var(--tw-border-opacity));
+          border-color: rgba(209, 213, 219, var(--tw-border-opacity));
         }
         .chatgpt-widget-space-x-4 > :not([hidden]) ~ :not([hidden]) {
           --tw-space-x-reverse: 0;
@@ -229,10 +265,6 @@
         .chatgpt-widget-rounded-lg {
           border-radius: 0.5rem;
         }
-        .chatgpt-widget-bg-gray-200 {
-            --tw-bg-opacity: 1;
-            background-color: rgba(229,231,235,var(--tw-bg-opacity));
-        }
         .chatgpt-widget-mb-3 {
           margin-bottom: 0.75rem;
         }
@@ -244,21 +276,15 @@
           color: rgba(239, 68, 68, var(--tw-text-opacity));
         }
         .chatgpt-widget-time{
-          color: rgba(0,0,0,.25);
           display: flex;
           flex-direction: column;
           justify-content: flex-end; /* Align content to the bottom */
         }
         #chatgpt-widget-messages, #chatgpt-widget-input-container{
-            border-left-color: rgba(229, 213, 219, var(--tw-border-opacity));
-            border-left-style: dotted;
-            border-left-width: 1px;
-            border-right-color: rgba(229, 213, 219, var(--tw-border-opacity));
-            border-right-style: dotted;
-            border-right-width: 1px;
-            border-bottom-color: rgba(229, 213, 219, var(--tw-border-opacity));
-            border-bottom-style: dotted;
-            border-bottom-width: 1px;
+            border-color: rgba(229, 213, 219);
+            border-style: dotted;
+            border-width: 1px;
+            border-top: none;
         }
         #chatgpt-widget-container {
           position: fixed;
@@ -303,17 +329,17 @@
 
       // Inject the HTML
       chatWidgetContainer.innerHTML = `
-        <div id="chatgpt-widget-bubble" class="chatgpt-widget-w-10 chatgpt-widget-h-10 chatgpt-widget-bg-gray-800 chatgpt-widget-rounded-full chatgpt-widget-flex chatgpt-widget-items-center chatgpt-widget-justify-center chatgpt-widget-cursor-pointer chatgpt-widget-text-3xl">
-          <svg id="chatgpt-widget-expand" viewBox="0 0 24 24" class="chatgpt-widget-hidden chatgpt-widget-w-6 chatgpt-widget-h-6 chatgpt-widget-text-white" style="fill: white;">
+        <div id="chatgpt-widget-bubble" class="chatgpt-widget-w-10 chatgpt-widget-h-10 chatgpt-widget-rounded-full chatgpt-widget-flex chatgpt-widget-items-center chatgpt-widget-justify-center chatgpt-widget-cursor-pointer chatgpt-widget-text-3xl" style="background-color: ${this.def.theme.bubble.background_color};">
+          <svg id="chatgpt-widget-expand" class="chatgpt-widget-hidden chatgpt-widget-w-6 chatgpt-widget-h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="${this.def.theme.bubble.text_color};">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M18.601 8.39897C18.269 8.06702 17.7309 8.06702 17.3989 8.39897L12 13.7979L6.60099 8.39897C6.26904 8.06702 5.73086 8.06702 5.39891 8.39897C5.06696 8.73091 5.06696 9.2691 5.39891 9.60105L11.3989 15.601C11.7309 15.933 12.269 15.933 12.601 15.601L18.601 9.60105C18.9329 9.2691 18.9329 8.73091 18.601 8.39897Z"></path>
           </svg>
-          <svg id="chatgpt-widget-shrink" xmlns="http://www.w3.org/2000/svg" class="chatgpt-widget-w-6 chatgpt-widget-h-6 chatgpt-widget-text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg id="chatgpt-widget-shrink" class="chatgpt-widget-w-6 chatgpt-widget-h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="${this.def.theme.bubble.text_color};">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
         </div>
-        <div id="chatgpt-widget-popup" class="chatgpt-widget-hidden chatgpt-widget-absolute chatgpt-widget-bottom-12 chatgpt-widget-right-0 chatgpt-widget-w-96 chatgpt-widget-bg-white chatgpt-widget-rounded-md chatgpt-widget-shadow-md chatgpt-widget-flex chatgpt-widget-flex-col chatgpt-widget-transition-all chatgpt-widget-text-sm">
-          <div id="chat-header" class="chatgpt-widget-flex chatgpt-widget-justify-between chatgpt-widget-items-center chatgpt-widget-p-1 chatgpt-widget-bg-gray-800 chatgpt-widget-text-white chatgpt-widget-rounded-t-md">
-            <h3 class="chatgpt-widget-ml-2 chatgpt-widget-m-0 chatgpt-widget-text-xs">${this.def.title}</h3>
+        <div id="chatgpt-widget-popup" class="chatgpt-widget-hidden chatgpt-widget-absolute chatgpt-widget-bottom-12 chatgpt-widget-right-0 chatgpt-widget-w-96 chatgpt-widget-rounded-md chatgpt-widget-shadow-md chatgpt-widget-flex chatgpt-widget-flex-col chatgpt-widget-transition-all chatgpt-widget-text-sm" style="background-color: ${this.def.theme.widget.background_color};">
+          <div id="chat-header" class="chatgpt-widget-flex chatgpt-widget-justify-between chatgpt-widget-items-center chatgpt-widget-p-1 chatgpt-widget-rounded-t-md" style="background-color: ${this.def.theme.title.background_color}; color: ${this.def.theme.title.text_color};">
+            <h3 class="chatgpt-widget-ml-2 chatgpt-widget-m-0 chatgpt-widget-text-xs">${this.def.language.title}</h3>
               <svg id="chatgpt-widget-close-popup" xmlns="http://www.w3.org/2000/svg" class="chatgpt-widget-h-6 chatgpt-widget-w-6 chatgpt-widget-cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -321,9 +347,9 @@
           <div id="chatgpt-widget-messages" class="chatgpt-widget-flex-1 chatgpt-widget-p-4 chatgpt-widget-overflow-y-auto"></div>
           <div id="chatgpt-widget-input-container" class="chatgpt-widget-p-4 chatgpt-widget-border-t chatgpt-widget-border-gray-200">
             <div class="chatgpt-widget-flex chatgpt-widget-space-x-4 chatgpt-widget-items-center">
-              <textarea rows="1" id="chatgpt-widget-input" class="chatgpt-widget-flex-1 chatgpt-widget-border chatgpt-widget-border-gray-300 chatgpt-widget-rounded-md chatgpt-widget-px-4 chatgpt-widget-py-2 chatgpt-widget-outline-none chatgpt-widget-w-3/4" placeholder="New lines(Ctrl+Enter)"></textarea>
-              <a id="chatgpt-widget-clear-chat" class="chatgpt-widget-cursor-pointer">Clear</a>
-              <button id="chatgpt-widget-submit" class="chatgpt-widget-bg-gray-800 chatgpt-widget-text-white chatgpt-widget-rounded-md chatgpt-widget-px-4 chatgpt-widget-py-2 chatgpt-widget-cursor-pointer">Send</button>
+              <textarea rows="1" id="chatgpt-widget-input" class="chatgpt-widget-flex-1 chatgpt-widget-border chatgpt-widget-border-gray-300 chatgpt-widget-rounded-md chatgpt-widget-px-4 chatgpt-widget-py-2 chatgpt-widget-outline-none chatgpt-widget-w-3/4" placeholder="${this.def.language.placeholder}"></textarea>
+              <a id="chatgpt-widget-clear-chat" class="chatgpt-widget-cursor-pointer" style="color: ${this.def.theme.clear_button.text_color};">${this.def.language.clear}</a>
+              <button id="chatgpt-widget-submit" class="chatgpt-widget-rounded-md chatgpt-widget-px-4 chatgpt-widget-py-2 chatgpt-widget-cursor-pointer" style="background-color: ${this.def.theme.send_button.background_color}; color: ${this.def.theme.send_button.text_color};">${this.def.language.send}</button>
             </div>
           </div>
         </div>
@@ -376,7 +402,7 @@
       that.dom.clearChat.addEventListener('click', function(){
         that.dom.chatMessages.innerHTML = '';
         localStorage.setItem('message', '');
-        that.reply(that.def.welcome);
+        that.reply(that.def.language.welcome);
         document.getElementById('chatgpt-widget-input').focus();
       })
     },
@@ -517,16 +543,16 @@
       const seconds = Math.floor((new Date() - timestamp) / 1000);
 
       let interval = Math.floor(seconds / 31536000);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' years ago');
+      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.years);
 
       interval = Math.floor(seconds / 2592000);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' months ago');
+      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.months);
 
       interval = Math.floor(seconds / 86400);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' days ago');
+      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.days);
 
       interval = Math.floor(seconds / 3600);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' hours ago');
+      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.hours);
 
       const date = new Date(timestamp);
       return this.wrapTimeTitle(timestamp, `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`);
@@ -537,8 +563,8 @@
       let time = this.formatTimestamp(timestamp);
       messageElement.className = 'chatgpt-widget-flex chatgpt-widget-justify-end chatgpt-widget-mb-3';
       messageElement.innerHTML = `
-        <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss">${time}</div>
-        <div class="chatgpt-widget-bg-gray-800 chatgpt-widget-text-white chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]">
+        <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">${time}</div>
+        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
           ${message}
         </div>
       `;
@@ -555,10 +581,10 @@
       let time = this.formatTimestamp(timestamp);
       replyElement.className = 'chatgpt-widget-flex chatgpt-widget-mb-3';
       replyElement.innerHTML = `
-        <div id="${id}" class="chatgpt-widget-bg-gray-200 text-black chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]">
+        <div id="${id}" class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
           ${message}
         </div>
-        <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss">${time}</div>
+        <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">${time}</div>
       `;
       chatMessages.appendChild(replyElement);
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -581,7 +607,7 @@
         }
       }
       if(new Date().getTime() - lastTimestamp > 86400000){
-        this.reply(this.def.welcome);
+        this.reply(this.def.language.welcome);
       }
     }
   };

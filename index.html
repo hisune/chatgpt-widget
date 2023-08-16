@@ -31,6 +31,16 @@
         new chatgptWidget({
             endpoint: 'https://opai.sockio.com/v1/chat/completions',
             model: 'gpt-3.5-turbo',
+            language: {
+                title: "test",
+                welcome: "xxx",
+                send: '发送',
+                clear: '清屏',
+                placeholder: '换行(Ctrl+Enter)',
+                ago: {
+                    hours: '小时前'
+                }
+            },
         });
     </script>
 </body>
