@@ -500,24 +500,24 @@
       // Reply to the user
       this.sendChatCompletion(this);
     },
-    formatTimestamp: function(timestamp){
+    formatTimestamp: function(timestamp) {
       if(!timestamp) timestamp = new Date().getTime();
-      const now = new Date();
-      const date = new Date(timestamp);
-      const diffTime = now - date;
+      const seconds = Math.floor((new Date() - timestamp) / 1000);
 
-      if (diffTime < 24 * 60 * 60 * 1000) { // 今天
-        return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-      } else if (diffTime < 30 * 24 * 60 * 60 * 1000) { // N天前
-        const daysAgo = Math.floor(diffTime / (24 * 60 * 60 * 1000));
-        return `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`;
-      } else if (diffTime < 12 * 30 * 24 * 60 * 60 * 1000) { // N月前
-        const monthsAgo = Math.floor(diffTime / (30 * 24 * 60 * 60 * 1000));
-        return `${monthsAgo} month${monthsAgo === 1 ? '' : 's'} ago`;
-      } else { // N年前
-        const yearsAgo = Math.floor(diffTime / (12 * 30 * 24 * 60 * 60 * 1000));
-        return `${yearsAgo} year${yearsAgo === 1 ? '' : 's'} ago`;
-      }
+      let interval = Math.floor(seconds / 31536000);
+      if (interval > 1) return interval + ' years ago';
+
+      interval = Math.floor(seconds / 2592000);
+      if (interval > 1) return interval + ' months ago';
+
+      interval = Math.floor(seconds / 86400);
+      if (interval > 1) return interval + ' days ago';
+
+      interval = Math.floor(seconds / 3600);
+      if (interval > 1) return interval + ' hours ago';
+
+      const date = new Date(timestamp);
+      return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
     },
     ask: function(message, timestamp) {
       message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
