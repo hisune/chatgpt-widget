@@ -6,8 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Chat Widget - by GPT 4</title>
     <script src="./chatgpt-widget.js"></script>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        html, body{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
-<body class="bg-yellow-100" style="text-align: center;background-color: rgba(254,243,199);">
+<body>
+<div style="text-align: center;background-color: rgba(254,243,199); width: 100%; height: 100%">
     <div class="flex flex-col items-center p-8 justify-center w-5xl h-screen md:text-center md:w-3xl ">
         <div>
             <h1 class="text-2xl font-bold leading-relaxed">chatgpt-widget</h1>
@@ -32,16 +43,10 @@
             endpoint: 'https://opai.sockio.com/v1/chat/completions',
             model: 'gpt-3.5-turbo',
             language: {
-                title: "test",
-                welcome: "xxx",
-                send: '发送',
-                clear: '清屏',
-                placeholder: '换行(Ctrl+Enter)',
-                ago: {
-                    hours: '小时前'
-                }
+                title: "Chat With GPT4"
             },
         });
     </script>
+</div>
 </body>
 </html>
