@@ -47,6 +47,7 @@ new chatgptWidget({
         },
         widget: {
             background_color: 'rgba(255, 255, 255)',
+            width: '32rem'
         },
         title: {
             text_color: 'rgba(255, 255, 255)',
