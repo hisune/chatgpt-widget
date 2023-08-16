@@ -47,6 +47,7 @@
         },
         widget: {
           background_color: 'rgba(255, 255, 255)',
+          width: '32rem'
         },
         title: {
           text_color: 'rgba(255, 255, 255)',
@@ -161,9 +162,6 @@
         }
         .chatgpt-widget-right-0 {
           right: 0px;
-        }
-        .chatgpt-widget-w-96 {
-          width: 24rem;
         }
         .chatgpt-widget-rounded-md {
           border-radius: 0.375rem;
@@ -298,7 +296,7 @@
           max-height: 85vh;
           transition: all 0.3s;
           overflow: hidden;
-          width: 32rem;
+          width: ${this.def.theme.widget.width};
           font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji';
         }
         #chatgpt-widget-input{
@@ -337,7 +335,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
         </div>
-        <div id="chatgpt-widget-popup" class="chatgpt-widget-hidden chatgpt-widget-absolute chatgpt-widget-bottom-12 chatgpt-widget-right-0 chatgpt-widget-w-96 chatgpt-widget-rounded-md chatgpt-widget-shadow-md chatgpt-widget-flex chatgpt-widget-flex-col chatgpt-widget-transition-all chatgpt-widget-text-sm" style="background-color: ${this.def.theme.widget.background_color};">
+        <div id="chatgpt-widget-popup" class="chatgpt-widget-hidden chatgpt-widget-absolute chatgpt-widget-bottom-12 chatgpt-widget-right-0 chatgpt-widget-rounded-md chatgpt-widget-shadow-md chatgpt-widget-flex chatgpt-widget-flex-col chatgpt-widget-transition-all chatgpt-widget-text-sm" style="background-color: ${this.def.theme.widget.background_color};">
           <div id="chat-header" class="chatgpt-widget-flex chatgpt-widget-justify-between chatgpt-widget-items-center chatgpt-widget-p-1 chatgpt-widget-rounded-t-md" style="background-color: ${this.def.theme.title.background_color}; color: ${this.def.theme.title.text_color};">
             <h3 class="chatgpt-widget-ml-2 chatgpt-widget-m-0 chatgpt-widget-text-xs">${this.def.language.title}</h3>
               <svg id="chatgpt-widget-close-popup" xmlns="http://www.w3.org/2000/svg" class="chatgpt-widget-h-6 chatgpt-widget-w-6 chatgpt-widget-cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
