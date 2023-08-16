@@ -26,7 +26,50 @@ new chatgptWidget({
     temperature: 0.7,
     model: 'gpt-4',
     max_history_size: 8,
-    title: 'Chat with AI'
+    language: {
+        title: 'Chat with AI',
+        welcome: 'Hello! How can I assist you today?',
+        send: 'Send',
+        clear: 'Clear',
+        placeholder: 'New lines(Ctrl+Enter)',
+        ago: {
+            days: 'days ago',
+            months: 'months ago',
+            years: 'years ago',
+            hours: 'hours ago',
+        }
+    },
+    theme:{
+        bubble: {
+            text_color: '--tw-text-opacity: 1; color: rgba(255, 255, 255, var(--tw-text-opacity))',
+            background_color: 'rgba(31, 41, 55)'
+        },
+        widget: {
+            background_color: 'rgba(255, 255, 255)',
+        },
+        title: {
+            text_color: 'rgba(255, 255, 255)',
+            background_color: 'rgba(31, 41, 55)'
+        },
+        user_message:{
+            text_color: 'rgba(255, 255, 255)',
+            background_color: 'rgba(31, 41, 55)'
+        },
+        bot_message:{
+            text_color: 'rgba(0, 0, 0)',
+            background_color: 'rgba(229,231,235)'
+        },
+        send_button:{
+            text_color: 'rgba(255, 255, 255)',
+            background_color: 'rgba(31, 41, 55)'
+        },
+        clear_button:{
+            text_color: 'rgba(0, 0, 0)',
+        },
+        time: {
+            text_color: 'rgba(0,0,0,.25)'
+        }
+    }
 });
 ```
 ### backend proxy
