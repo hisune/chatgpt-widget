@@ -84,7 +84,7 @@
     },
     loadingSvg: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                   width="32px" height="20px" viewBox="0 0 32 20" style="enable-background:new 0 0 50 50;"
+                   width="32px" height="14px" viewBox="0 0 32 14" style="enable-background:new 0 0 50 50;"
                    xml:space="preserve">
       <rect x="0" y="0" width="4" height="10" fill="#333">
         <animateTransform attributeType="xml"
@@ -403,7 +403,7 @@
         that.dom.chatMessages.innerHTML = '';
         localStorage.setItem('message', '');
         that.reply(that.def.language.welcome);
-        document.getElementById('chatgpt-widget-input').focus();
+        that.dom.chatInput.focus();
       })
     },
     sendChatCompletion: async (that) =>  {
@@ -417,6 +417,7 @@
       const id = that.reply('');
       const replyElement = document.getElementById(id);
       replyElement.innerHTML = that.loadingSvg;
+      that.dom.chatInput.disabled = true;
       try{
         let response = await fetch(that.def.endpoint, {
           method: "POST",
@@ -472,6 +473,8 @@
         console.log(e);
         that.innerErrorText(replyElement, 'Error: API fetch error.');
       }
+      that.dom.chatInput.disabled = false;
+      that.dom.chatInput.focus();
   },
     innerErrorText: function(element, text){
       element.innerHTML = `<div class="chatgpt-widget-text-red-500">${text}</div>`;
@@ -511,7 +514,7 @@
       document.getElementById('chatgpt-widget-expand').classList.toggle('chatgpt-widget-hidden');
       document.getElementById('chatgpt-widget-shrink').classList.toggle('chatgpt-widget-hidden');
       if (!chatPopup.classList.contains('chatgpt-widget-hidden')) {
-        document.getElementById('chatgpt-widget-input').focus();
+        this.dom.chatInput.focus();
         this.scrollToBottom();
       }
     },
