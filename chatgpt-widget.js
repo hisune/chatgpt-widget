@@ -563,7 +563,7 @@
         if (numberOfUnits >= 1) {
           const ago = `${interval}${numberOfUnits > 1 ? 's' : ''}`;
           const agoText = this.def.language.ago[ago];
-          return `${numberOfUnits} ${agoText}`;
+          return this.wrapTimeTitle(timestamp, `${numberOfUnits} ${agoText}`);
         }
       }
 
