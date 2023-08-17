@@ -34,6 +34,10 @@
         clear: 'Clear',
         placeholder: 'New lines(Ctrl+Enter)',
         ago: {
+          day: 'day ago',
+          month: 'month ago',
+          year: 'year ago',
+          hour: 'hour ago',
           days: 'days ago',
           months: 'months ago',
           years: 'years ago',
@@ -541,19 +545,27 @@
     },
     formatTimestamp: function(timestamp) {
       if(!timestamp) timestamp = new Date().getTime();
-      const seconds = Math.floor((new Date() - timestamp) / 1000);
 
-      let interval = Math.floor(seconds / 31536000);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.years);
+      const inputDate = new Date(timestamp);
+      const currentDate = new Date();
+      const timeDifferenceInSeconds = Math.floor((currentDate.getTime() - inputDate.getTime()) / 1000);
 
-      interval = Math.floor(seconds / 2592000);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.months);
+      const intervals = {
+        year: 31536000,
+        month: 2592000,
+        week: 604800,
+        day: 86400,
+        hour: 3600
+      };
 
-      interval = Math.floor(seconds / 86400);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.days);
-
-      interval = Math.floor(seconds / 3600);
-      if (interval > 1) return this.wrapTimeTitle(timestamp, interval + ' ' + this.def.language.ago.hours);
+      for (const interval in intervals) {
+        const numberOfUnits = Math.floor(timeDifferenceInSeconds / intervals[interval]);
+        if (numberOfUnits >= 1) {
+          const ago = `${interval}${numberOfUnits > 1 ? 's' : ''}`;
+          const agoText = this.def.language.ago[ago];
+          return `${numberOfUnits} ${agoText}`;
+        }
+      }
 
       const date = new Date(timestamp);
       return this.wrapTimeTitle(timestamp, `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`);
