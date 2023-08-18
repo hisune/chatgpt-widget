@@ -36,6 +36,10 @@ new chatgptWidget({
         clear: 'Clear',
         placeholder: 'New lines(Ctrl+Enter)',
         ago: {
+            day: 'day ago',
+            month: 'month ago',
+            year: 'year ago',
+            hour: 'hour ago',
             days: 'days ago',
             months: 'months ago',
             years: 'years ago',
