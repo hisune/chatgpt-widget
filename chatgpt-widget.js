@@ -24,6 +24,8 @@
   chatgptWidget.prototype = {
     def: {
       endpoint: 'https://api.openai.com/v1/chat/completions',
+      api_key: null,
+      top_p: 1,
       temperature: 0.7,
       model: 'gpt-4',
       max_history_size: 8,
@@ -413,6 +415,7 @@
         model: that.def.model,
         stream: true,
         temperature: that.def.temperature,
+        top_p: that.def.top_p,
         messages: that.getMessageStorage(true)
       };
       console.log(data);
@@ -424,7 +427,8 @@
         let response = await fetch(that.def.endpoint, {
           method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + that.def.api_key
           },
           body: JSON.stringify(data)
         });

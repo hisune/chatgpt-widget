@@ -20,10 +20,12 @@ Add js code to end of body tag.
 ```js
 new chatgptWidget();
 ```
-Default options:
+Default options(Due to the risk of api_key leakage, it is not recommended to use api_key on the client side):
 ```js
 new chatgptWidget({
     endpoint: 'https://api.openai.com/v1/chat/completions',
+    api_key: null,
+    top_p: 1,
     temperature: 0.7,
     model: 'gpt-4',
     max_history_size: 8,
