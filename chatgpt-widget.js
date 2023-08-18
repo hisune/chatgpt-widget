@@ -1,95 +1,95 @@
 // https://github.com/hisune/chatgpt-widget
-;(function(global) {
-  "use strict";
+;(function (global) {
+    "use strict";
 
-  let chatgptWidget = function(opt) {
-    this._initial(opt);
-  };
+    let chatgptWidget = function (opt) {
+        this._initial(opt);
+    };
 
-  function extend(defaultOptions, newOptions) {
-    const mergedOptions = { ...defaultOptions, ...newOptions };
+    function extend(defaultOptions, newOptions) {
+        const mergedOptions = {...defaultOptions, ...newOptions};
 
-    for (const key in newOptions) {
-      if (typeof newOptions[key] === 'object' && !Array.isArray(newOptions[key])) {
-        // Recursively merge nested objects
-        mergedOptions[key] = extend(defaultOptions[key], newOptions[key]);
-      } else {
-        // Update individual values
-        mergedOptions[key] = newOptions[key];
-      }
+        for (const key in newOptions) {
+            if (typeof newOptions[key] === 'object' && !Array.isArray(newOptions[key])) {
+                // Recursively merge nested objects
+                mergedOptions[key] = extend(defaultOptions[key], newOptions[key]);
+            } else {
+                // Update individual values
+                mergedOptions[key] = newOptions[key];
+            }
+        }
+        return mergedOptions;
     }
-    return mergedOptions;
-  }
 
-  chatgptWidget.prototype = {
-    def: {
-      endpoint: 'https://api.openai.com/v1/chat/completions',
-      api_key: null,
-      top_p: 1,
-      temperature: 0.7,
-      model: 'gpt-4',
-      max_history_size: 8,
-      language: {
-        title: 'Chat with AI',
-        welcome: 'Hello! How can I assist you today?',
-        send: 'Send',
-        clear: 'Clear',
-        placeholder: 'New lines(Ctrl+Enter)',
-        ago: {
-          day: 'day ago',
-          month: 'month ago',
-          year: 'year ago',
-          hour: 'hour ago',
-          days: 'days ago',
-          months: 'months ago',
-          years: 'years ago',
-          hours: 'hours ago',
-        }
-      },
-      theme:{
-        bubble: {
-          text_color: '--tw-text-opacity: 1; color: rgba(255, 255, 255, var(--tw-text-opacity))',
-          background_color: 'rgba(31, 41, 55)'
+    chatgptWidget.prototype = {
+        def: {
+            endpoint: 'https://api.openai.com/v1/chat/completions',
+            api_key: null,
+            top_p: 1,
+            temperature: 0.7,
+            model: 'gpt-4',
+            max_history_size: 8,
+            language: {
+                title: 'Chat with AI',
+                welcome: 'Hello! How can I assist you today?',
+                send: 'Send',
+                clear: 'Clear',
+                placeholder: 'New lines(Ctrl+Enter)',
+                ago: {
+                    day: 'day ago',
+                    month: 'month ago',
+                    year: 'year ago',
+                    hour: 'hour ago',
+                    days: 'days ago',
+                    months: 'months ago',
+                    years: 'years ago',
+                    hours: 'hours ago',
+                }
+            },
+            theme: {
+                bubble: {
+                    text_color: '--tw-text-opacity: 1; color: rgba(255, 255, 255, var(--tw-text-opacity))',
+                    background_color: 'rgba(31, 41, 55)'
+                },
+                widget: {
+                    background_color: 'rgba(255, 255, 255)',
+                    width: '32rem'
+                },
+                title: {
+                    text_color: 'rgba(255, 255, 255)',
+                    background_color: 'rgba(31, 41, 55)'
+                },
+                user_message: {
+                    text_color: 'rgba(255, 255, 255)',
+                    background_color: 'rgba(31, 41, 55)'
+                },
+                bot_message: {
+                    text_color: 'rgba(0, 0, 0)',
+                    background_color: 'rgba(229,231,235)'
+                },
+                send_button: {
+                    text_color: 'rgba(255, 255, 255)',
+                    background_color: 'rgba(31, 41, 55)'
+                },
+                clear_button: {
+                    text_color: 'rgba(0, 0, 0)',
+                },
+                time: {
+                    text_color: 'rgba(0,0,0,.25)'
+                }
+            }
         },
-        widget: {
-          background_color: 'rgba(255, 255, 255)',
-          width: '32rem'
-        },
-        title: {
-          text_color: 'rgba(255, 255, 255)',
-          background_color: 'rgba(31, 41, 55)'
-        },
-        user_message:{
-          text_color: 'rgba(255, 255, 255)',
-          background_color: 'rgba(31, 41, 55)'
-        },
-        bot_message:{
-          text_color: 'rgba(0, 0, 0)',
-          background_color: 'rgba(229,231,235)'
-        },
-        send_button:{
-          text_color: 'rgba(255, 255, 255)',
-          background_color: 'rgba(31, 41, 55)'
-        },
-        clear_button:{
-          text_color: 'rgba(0, 0, 0)',
-        },
-        time: {
-          text_color: 'rgba(0,0,0,.25)'
-        }
-      }
-    },
-    _initial: function(opt) {
-      this.def = extend(this.def, opt);
+        _initial: function (opt) {
+            this.def = extend(this.def, opt);
 
-      let that = this;
-      setTimeout(function (){
-        that.injectHtml();
-        that.listenEvent();
-        that.initHistory();
-      }, 0);
-    },
-    loadingSvg: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+            let that = this;
+            setTimeout(function () {
+                that.injectHtml();
+                that.listenEvent();
+                that.initHistory();
+            }, 0);
+        },
+        loadingSvg: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                    width="32px" height="14px" viewBox="0 0 32 14" style="enable-background:new 0 0 50 50;"
                    xml:space="preserve">
@@ -112,18 +112,18 @@
                           begin="0.4s" dur="0.6s" repeatCount="indefinite"/>
       </rect>
     </svg>`,
-    dom: {
-      chatInput: null,
-      chatSubmit: null,
-      chatMessages: null,
-      chatBubble: null,
-      chatPopup: null,
-      closePopup: null,
-      clearChat: null,
-    },
-    injectHtml: function(){
-      const style = document.createElement('style');
-      style.innerHTML = `
+        dom: {
+            chatInput: null,
+            chatSubmit: null,
+            chatMessages: null,
+            chatBubble: null,
+            chatPopup: null,
+            closePopup: null,
+            clearChat: null,
+        },
+        injectHtml: function () {
+            const style = document.createElement('style');
+            style.innerHTML = `
         #chatgpt-widget-container, #chatgpt-widget-submit {
           --tw-border-opacity: 1;
           border-color: rgba(229, 231, 235, var(--tw-border-opacity));
@@ -324,15 +324,15 @@
         }
       `;
 
-      document.head.appendChild(style);
+            document.head.appendChild(style);
 
-      // Create chat widget container
-      const chatWidgetContainer = document.createElement('div');
-      chatWidgetContainer.id = 'chatgpt-widget-container';
-      document.body.appendChild(chatWidgetContainer);
+            // Create chat widget container
+            const chatWidgetContainer = document.createElement('div');
+            chatWidgetContainer.id = 'chatgpt-widget-container';
+            document.body.appendChild(chatWidgetContainer);
 
-      // Inject the HTML
-      chatWidgetContainer.innerHTML = `
+            // Inject the HTML
+            chatWidgetContainer.innerHTML = `
         <div id="chatgpt-widget-bubble" class="chatgpt-widget-w-10 chatgpt-widget-h-10 chatgpt-widget-rounded-full chatgpt-widget-flex chatgpt-widget-items-center chatgpt-widget-justify-center chatgpt-widget-cursor-pointer chatgpt-widget-text-3xl" style="background-color: ${this.def.theme.bubble.background_color};">
           <svg id="chatgpt-widget-expand" class="chatgpt-widget-hidden chatgpt-widget-w-6 chatgpt-widget-h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="${this.def.theme.bubble.text_color};">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M18.601 8.39897C18.269 8.06702 17.7309 8.06702 17.3989 8.39897L12 13.7979L6.60099 8.39897C6.26904 8.06702 5.73086 8.06702 5.39891 8.39897C5.06696 8.73091 5.06696 9.2691 5.39891 9.60105L11.3989 15.601C11.7309 15.933 12.269 15.933 12.601 15.601L18.601 9.60105C18.9329 9.2691 18.9329 8.73091 18.601 8.39897Z"></path>
@@ -358,277 +358,277 @@
           </div>
         </div>
       `;
-    },
-    listenEvent: function () {
-      let that = this;
-      that.dom.chatInput = document.getElementById('chatgpt-widget-input');
-      that.dom.chatSubmit = document.getElementById('chatgpt-widget-submit');
-      that.dom.chatMessages = document.getElementById('chatgpt-widget-messages');
-      that.dom.chatBubble = document.getElementById('chatgpt-widget-bubble');
-      that.dom.chatPopup = document.getElementById('chatgpt-widget-popup');
-      that.dom.closePopup = document.getElementById('chatgpt-widget-close-popup');
-      that.dom.clearChat = document.getElementById('chatgpt-widget-clear-chat');
+        },
+        listenEvent: function () {
+            let that = this;
+            that.dom.chatInput = document.getElementById('chatgpt-widget-input');
+            that.dom.chatSubmit = document.getElementById('chatgpt-widget-submit');
+            that.dom.chatMessages = document.getElementById('chatgpt-widget-messages');
+            that.dom.chatBubble = document.getElementById('chatgpt-widget-bubble');
+            that.dom.chatPopup = document.getElementById('chatgpt-widget-popup');
+            that.dom.closePopup = document.getElementById('chatgpt-widget-close-popup');
+            that.dom.clearChat = document.getElementById('chatgpt-widget-clear-chat');
 
-      that.dom.chatSubmit.addEventListener('click', function() {
+            that.dom.chatSubmit.addEventListener('click', function () {
 
-        const message = that.dom.chatInput.value.trim();
-        if (!message) return;
+                const message = that.dom.chatInput.value.trim();
+                if (!message) return;
 
-        that.dom.chatMessages.scrollTop = that.dom.chatMessages.scrollHeight;
+                that.dom.chatMessages.scrollTop = that.dom.chatMessages.scrollHeight;
 
-        that.dom.chatInput.value = '';
+                that.dom.chatInput.value = '';
 
-        that.onUserRequest(message);
+                that.onUserRequest(message);
 
-      });
+            });
 
-      that.dom.chatInput.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-          if(!event.ctrlKey){
-            that.dom.chatSubmit.click();
-            that.dom.chatInput.rows = 1;
-          }else{
-            that.dom.chatInput.value += "\n";
-            that.dom.chatInput.rows = 2;
-            that.dom.chatInput.scrollTo(0, that.dom.chatInput.scrollHeight);
-          }
-        }
-      });
+            that.dom.chatInput.addEventListener('keyup', function (event) {
+                if (event.key === 'Enter') {
+                    if (!event.ctrlKey) {
+                        that.dom.chatSubmit.click();
+                        that.dom.chatInput.rows = 1;
+                    } else {
+                        that.dom.chatInput.value += "\n";
+                        that.dom.chatInput.rows = 2;
+                        that.dom.chatInput.scrollTo(0, that.dom.chatInput.scrollHeight);
+                    }
+                }
+            });
 
-      that.dom.chatBubble.addEventListener('click', function() {
-        that.togglePopup();
-      });
+            that.dom.chatBubble.addEventListener('click', function () {
+                that.togglePopup();
+            });
 
-      that.dom.closePopup.addEventListener('click', function() {
-        that.togglePopup();
-      });
+            that.dom.closePopup.addEventListener('click', function () {
+                that.togglePopup();
+            });
 
-      that.dom.clearChat.addEventListener('click', function(){
-        that.dom.chatMessages.innerHTML = '';
-        localStorage.setItem('message', '');
-        that.reply(that.def.language.welcome);
-        that.dom.chatInput.focus();
-      })
-    },
-    sendChatCompletion: async (that) =>  {
-      let data = {
-        model: that.def.model,
-        stream: true,
-        temperature: that.def.temperature,
-        top_p: that.def.top_p,
-        messages: that.getMessageStorage(true)
-      };
-      console.log(data);
-      const id = that.reply('');
-      const replyElement = document.getElementById(id);
-      replyElement.innerHTML = that.loadingSvg;
-      that.dom.chatInput.disabled = true;
-      try{
-        let response = await fetch(that.def.endpoint, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + that.def.api_key
-          },
-          body: JSON.stringify(data)
-        });
-        if(response.status !== 200){
-          console.log('status ->  ' + response.status);
-          let jsonResponse = await response.json();
-          if(jsonResponse.hasOwnProperty('error')){
-            that.innerErrorText(replyElement, 'Error: ' + jsonResponse.error.message);
-          }else{
-            that.innerErrorText(replyElement, 'Error: Unknown error.');
-          }
-          return;
-        }
-        // Read the response as a stream of data
-        const reader = response.body?.getReader();
-        console.log('continue ->');
+            that.dom.clearChat.addEventListener('click', function () {
+                that.dom.chatMessages.innerHTML = '';
+                localStorage.setItem('message', '');
+                that.reply(that.def.language.welcome);
+                that.dom.chatInput.focus();
+            })
+        },
+        sendChatCompletion: async (that) => {
+            let data = {
+                model: that.def.model,
+                stream: true,
+                temperature: that.def.temperature,
+                top_p: that.def.top_p,
+                messages: that.getMessageStorage(true)
+            };
+            console.log(data);
+            const id = that.reply('');
+            const replyElement = document.getElementById(id);
+            replyElement.innerHTML = that.loadingSvg;
+            that.dom.chatInput.disabled = true;
+            try {
+                let response = await fetch(that.def.endpoint, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + that.def.api_key
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (response.status !== 200) {
+                    console.log('status ->  ' + response.status);
+                    let jsonResponse = await response.json();
+                    if (jsonResponse.hasOwnProperty('error')) {
+                        that.innerErrorText(replyElement, 'Error: ' + jsonResponse.error.message);
+                    } else {
+                        that.innerErrorText(replyElement, 'Error: Unknown error.');
+                    }
+                    return;
+                }
+                // Read the response as a stream of data
+                const reader = response.body?.getReader();
+                console.log('continue ->');
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            break;
-          }
+                while (true) {
+                    const {done, value} = await reader.read();
+                    if (done) {
+                        break;
+                    }
 
-          const textDecoder = new TextDecoder("utf-8");
-          const chunk = textDecoder.decode(value);
-          for (const line of chunk.split("\n")) {
-            const trimmedLine = line.trim();
-            if (!trimmedLine || trimmedLine === "data: [DONE]") {
-              continue;
+                    const textDecoder = new TextDecoder("utf-8");
+                    const chunk = textDecoder.decode(value);
+                    for (const line of chunk.split("\n")) {
+                        const trimmedLine = line.trim();
+                        if (!trimmedLine || trimmedLine === "data: [DONE]") {
+                            continue;
+                        }
+
+                        const json = trimmedLine.replace("data: ", "");
+                        const obj = JSON.parse(json);
+
+                        const deltaText = obj?.choices?.[0]?.delta?.content;
+                        if (deltaText !== undefined) {
+                            if (replyElement.innerHTML === that.loadingSvg) {
+                                replyElement.innerHTML = '';
+                            }
+                            that.innerText(replyElement, replyElement.innerText + deltaText);
+                        }
+                    }
+                    that.scrollToBottom();
+                }
+                console.log('AI response: ' + replyElement.innerText);
+                that.setMessageStorage('assistant', replyElement.innerText);
+            } catch (e) {
+                console.log(e);
+                that.innerErrorText(replyElement, 'Error: API fetch error.');
+            }
+            that.dom.chatInput.disabled = false;
+            that.dom.chatInput.focus();
+        },
+        innerErrorText: function (element, text) {
+            element.innerHTML = `<div class="chatgpt-widget-text-red-500">${text}</div>`;
+            this.scrollToBottom();
+        },
+        innerText: function (element, text) {
+            element.innerText = text;
+        },
+        getMessageStorage: function (withoutTime) {
+            let messageHistory = localStorage.getItem('message');
+            if (!messageHistory) {
+                return [];
+            }
+            let messageHistoryJson = JSON.parse(messageHistory);
+            if (withoutTime) {
+                for (let i in messageHistoryJson) {
+                    delete messageHistoryJson[i].time;
+                }
+            }
+            return messageHistoryJson;
+        },
+        setMessageStorage: function (role, message) {
+            let messageHistory = this.getMessageStorage();
+            if (messageHistory.length >= this.def.max_history_size) {
+                messageHistory.shift();
+            }
+            messageHistory.push({
+                role: role,
+                content: message,
+                time: new Date().getTime()
+            })
+            localStorage.setItem('message', JSON.stringify(messageHistory));
+        },
+        togglePopup: function () {
+            const chatPopup = document.getElementById('chatgpt-widget-popup');
+            chatPopup.classList.toggle('chatgpt-widget-hidden');
+            document.getElementById('chatgpt-widget-expand').classList.toggle('chatgpt-widget-hidden');
+            document.getElementById('chatgpt-widget-shrink').classList.toggle('chatgpt-widget-hidden');
+            if (!chatPopup.classList.contains('chatgpt-widget-hidden')) {
+                this.dom.chatInput.focus();
+                this.scrollToBottom();
+            }
+        },
+        onUserRequest: function (message) {
+            // Handle user request here
+            console.log('User request:', message);
+            this.setMessageStorage('user', message)
+
+            // Display user message
+            this.ask(message);
+
+            // Reply to the user
+            this.sendChatCompletion(this);
+        },
+        wrapTimeTitle: function (timestamp, text) {
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            return `<span title="${formattedDate}">${text}</span>`;
+        },
+        formatTimestamp: function (timestamp) {
+            if (!timestamp) timestamp = new Date().getTime();
+
+            const inputDate = new Date(timestamp);
+            const currentDate = new Date();
+            const timeDifferenceInSeconds = Math.floor((currentDate.getTime() - inputDate.getTime()) / 1000);
+
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600
+            };
+
+            for (const interval in intervals) {
+                const numberOfUnits = Math.floor(timeDifferenceInSeconds / intervals[interval]);
+                if (numberOfUnits >= 1) {
+                    const ago = `${interval}${numberOfUnits > 1 ? 's' : ''}`;
+                    const agoText = this.def.language.ago[ago];
+                    return this.wrapTimeTitle(timestamp, `${numberOfUnits} ${agoText}`);
+                }
             }
 
-            const json = trimmedLine.replace("data: ", "");
-            const obj = JSON.parse(json);
-
-            const deltaText = obj?.choices?.[0]?.delta?.content;
-            if(deltaText !== undefined){
-              if(replyElement.innerHTML === that.loadingSvg){
-                replyElement.innerHTML = '';
-              }
-              that.innerText(replyElement, replyElement.innerText + deltaText);
-            }
-          }
-          that.scrollToBottom();
-        }
-        console.log('AI response: ' + replyElement.innerText);
-        that.setMessageStorage('assistant', replyElement.innerText);
-      }catch (e){
-        console.log(e);
-        that.innerErrorText(replyElement, 'Error: API fetch error.');
-      }
-      that.dom.chatInput.disabled = false;
-      that.dom.chatInput.focus();
-  },
-    innerErrorText: function(element, text){
-      element.innerHTML = `<div class="chatgpt-widget-text-red-500">${text}</div>`;
-      this.scrollToBottom();
-    },
-    innerText: function(element, text){
-      element.innerText = text;
-    },
-    getMessageStorage: function(withoutTime) {
-      let messageHistory = localStorage.getItem('message');
-      if(!messageHistory){
-        return [];
-      }
-      let messageHistoryJson = JSON.parse(messageHistory);
-      if(withoutTime){
-        for(let i in messageHistoryJson){
-          delete messageHistoryJson[i].time;
-        }
-      }
-      return messageHistoryJson;
-    },
-    setMessageStorage: function(role, message) {
-      let messageHistory = this.getMessageStorage();
-      if(messageHistory.length >= this.def.max_history_size){
-        messageHistory.shift();
-      }
-      messageHistory.push({
-        role: role,
-        content: message,
-        time: new Date().getTime()
-      })
-      localStorage.setItem('message', JSON.stringify(messageHistory));
-    },
-    togglePopup: function() {
-      const chatPopup = document.getElementById('chatgpt-widget-popup');
-      chatPopup.classList.toggle('chatgpt-widget-hidden');
-      document.getElementById('chatgpt-widget-expand').classList.toggle('chatgpt-widget-hidden');
-      document.getElementById('chatgpt-widget-shrink').classList.toggle('chatgpt-widget-hidden');
-      if (!chatPopup.classList.contains('chatgpt-widget-hidden')) {
-        this.dom.chatInput.focus();
-        this.scrollToBottom();
-      }
-    },
-    onUserRequest: function(message) {
-      // Handle user request here
-      console.log('User request:', message);
-      this.setMessageStorage('user', message)
-
-      // Display user message
-      this.ask(message);
-
-      // Reply to the user
-      this.sendChatCompletion(this);
-    },
-    wrapTimeTitle: function(timestamp, text){
-      const date = new Date(timestamp);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-
-      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-      return `<span title="${formattedDate}">${text}</span>`;
-    },
-    formatTimestamp: function(timestamp) {
-      if(!timestamp) timestamp = new Date().getTime();
-
-      const inputDate = new Date(timestamp);
-      const currentDate = new Date();
-      const timeDifferenceInSeconds = Math.floor((currentDate.getTime() - inputDate.getTime()) / 1000);
-
-      const intervals = {
-        year: 31536000,
-        month: 2592000,
-        week: 604800,
-        day: 86400,
-        hour: 3600
-      };
-
-      for (const interval in intervals) {
-        const numberOfUnits = Math.floor(timeDifferenceInSeconds / intervals[interval]);
-        if (numberOfUnits >= 1) {
-          const ago = `${interval}${numberOfUnits > 1 ? 's' : ''}`;
-          const agoText = this.def.language.ago[ago];
-          return this.wrapTimeTitle(timestamp, `${numberOfUnits} ${agoText}`);
-        }
-      }
-
-      const date = new Date(timestamp);
-      return this.wrapTimeTitle(timestamp, `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`);
-    },
-    ask: function(message, timestamp) {
-      message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
-      const messageElement = document.createElement('div');
-      let time = this.formatTimestamp(timestamp);
-      messageElement.className = 'chatgpt-widget-flex chatgpt-widget-justify-end chatgpt-widget-mb-3';
-      messageElement.innerHTML = `
+            const date = new Date(timestamp);
+            return this.wrapTimeTitle(timestamp, `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`);
+        },
+        ask: function (message, timestamp) {
+            message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
+            const messageElement = document.createElement('div');
+            let time = this.formatTimestamp(timestamp);
+            messageElement.className = 'chatgpt-widget-flex chatgpt-widget-justify-end chatgpt-widget-mb-3';
+            messageElement.innerHTML = `
         <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">${time}</div>
         <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
           ${message}
         </div>
       `;
-      this.dom.chatMessages.appendChild(messageElement);
-      this.dom.chatMessages.scrollTop = this.dom.chatMessages.scrollHeight;
+            this.dom.chatMessages.appendChild(messageElement);
+            this.dom.chatMessages.scrollTop = this.dom.chatMessages.scrollHeight;
 
-      this.dom.chatInput.value = '';
-    },
-    reply: function(message, timestamp) {
-      const chatMessages = document.getElementById('chatgpt-widget-messages');
-      const replyElement = document.createElement('div');
-      const id = 'reply' + (new Date()).getTime();
-      message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
-      let time = this.formatTimestamp(timestamp);
-      replyElement.className = 'chatgpt-widget-flex chatgpt-widget-mb-3';
-      replyElement.innerHTML = `
+            this.dom.chatInput.value = '';
+        },
+        reply: function (message, timestamp) {
+            const chatMessages = document.getElementById('chatgpt-widget-messages');
+            const replyElement = document.createElement('div');
+            const id = 'reply' + (new Date()).getTime();
+            message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
+            let time = this.formatTimestamp(timestamp);
+            replyElement.className = 'chatgpt-widget-flex chatgpt-widget-mb-3';
+            replyElement.innerHTML = `
         <div id="${id}" class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
           ${message}
         </div>
         <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">${time}</div>
       `;
-      chatMessages.appendChild(replyElement);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      return id;
-    },
-    scrollToBottom: function() {
-      document.getElementById("chatgpt-widget-messages").scrollTo(0, document.getElementById("chatgpt-widget-messages").scrollHeight);
-    },
-    initHistory: function () {
-      let chatMessagesHistory = this.getMessageStorage();
-      let lastTimestamp = 0
-      if(chatMessagesHistory.length > 0){
-        for(let key in chatMessagesHistory){
-          if(chatMessagesHistory[key].role === 'user'){
-            this.ask(chatMessagesHistory[key].content, chatMessagesHistory[key].time);
-          }else if(chatMessagesHistory[key].role === 'assistant'){
-            this.reply(chatMessagesHistory[key].content, chatMessagesHistory[key].time);
-          }
-          lastTimestamp = chatMessagesHistory[key].time || new Date().getTime();
+            chatMessages.appendChild(replyElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return id;
+        },
+        scrollToBottom: function () {
+            document.getElementById("chatgpt-widget-messages").scrollTo(0, document.getElementById("chatgpt-widget-messages").scrollHeight);
+        },
+        initHistory: function () {
+            let chatMessagesHistory = this.getMessageStorage();
+            let lastTimestamp = 0
+            if (chatMessagesHistory.length > 0) {
+                for (let key in chatMessagesHistory) {
+                    if (chatMessagesHistory[key].role === 'user') {
+                        this.ask(chatMessagesHistory[key].content, chatMessagesHistory[key].time);
+                    } else if (chatMessagesHistory[key].role === 'assistant') {
+                        this.reply(chatMessagesHistory[key].content, chatMessagesHistory[key].time);
+                    }
+                    lastTimestamp = chatMessagesHistory[key].time || new Date().getTime();
+                }
+            }
+            if (new Date().getTime() - lastTimestamp > 86400000) {
+                this.reply(this.def.language.welcome);
+            }
         }
-      }
-      if(new Date().getTime() - lastTimestamp > 86400000){
-        this.reply(this.def.language.welcome);
-      }
-    }
-  };
+    };
 
-  global.chatgptWidget = chatgptWidget;
+    global.chatgptWidget = chatgptWidget;
 
 })(this);
