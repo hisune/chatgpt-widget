@@ -37,41 +37,53 @@ new chatgptWidget({
         placeholder: 'New lines(Ctrl+Enter)',
         ago: {
             day: 'day ago',
+            week: 'week ago',
             month: 'month ago',
             year: 'year ago',
             hour: 'hour ago',
             days: 'days ago',
+            weeks: 'weeks ago',
             months: 'months ago',
             years: 'years ago',
             hours: 'hours ago',
         }
     },
-    theme:{
+    id: null,
+    theme: {
+        container: {
+            position: 'fixed',
+            bottom: '10px',
+            right: '20px',
+        },
         bubble: {
             text_color: '--tw-text-opacity: 1; color: rgba(255, 255, 255, var(--tw-text-opacity))',
-            background_color: 'rgba(31, 41, 55)'
+            background_color: 'rgba(31, 41, 55)',
+            bubble_size: '40px',
+            icon_size: '24px'
         },
         widget: {
             background_color: 'rgba(255, 255, 255)',
-            width: '32rem'
+            width: '512px',
+            bottom: '48px',
+            top: 'auto'
         },
         title: {
             text_color: 'rgba(255, 255, 255)',
             background_color: 'rgba(31, 41, 55)'
         },
-        user_message:{
+        user_message: {
             text_color: 'rgba(255, 255, 255)',
             background_color: 'rgba(31, 41, 55)'
         },
-        bot_message:{
+        bot_message: {
             text_color: 'rgba(0, 0, 0)',
             background_color: 'rgba(229,231,235)'
         },
-        send_button:{
+        send_button: {
             text_color: 'rgba(255, 255, 255)',
             background_color: 'rgba(31, 41, 55)'
         },
-        clear_button:{
+        clear_button: {
             text_color: 'rgba(0, 0, 0)',
         },
         time: {
