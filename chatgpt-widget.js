@@ -46,6 +46,12 @@
                     months: 'months ago',
                     years: 'years ago',
                     hours: 'hours ago',
+                },
+                settings:{
+                    model: 'OpenAI model',
+                    temperature: 'Temperature(0-2)',
+                    top_p: 'Top P(0-1)',
+                    max_history_size: 'Max History Message Size',
                 }
             },
             id: null,
@@ -132,6 +138,9 @@
             chatPopup: null,
             closePopup: null,
             clearChat: null,
+            chatSettingsButton: null,
+            chatSettings: null,
+            chatOptions: null
         },
         injectHtml: function () {
             const style = document.createElement('style');
@@ -247,8 +256,8 @@
         }
         .chatgpt-widget-space-x-4 > :not([hidden]) ~ :not([hidden]) {
           --tw-space-x-reverse: 0;
-          margin-right: calc(16px * var(--tw-space-x-reverse));
-          margin-left: calc(16px * calc(1 - var(--tw-space-x-reverse)));
+          margin-right: calc(8px * var(--tw-space-x-reverse));
+          margin-left: calc(8px * calc(1 - var(--tw-space-x-reverse)));
         }
         .chatgpt-widget-border {
           border-width: 1px;
@@ -337,6 +346,22 @@
             border-radius: 0;
           }
         }
+        #chatgpt-settings{
+            text-align: right;
+            padding: 8px 16px;
+        }
+        #chatgpt-settings > div{
+            margin: 6px 0;
+        }
+        #chatgpt-settings input, #chatgpt-settings select{
+            border-color: rgba(209, 213, 219);
+            border-radius: 2px;
+            border-width: 1px;
+            padding: 0 2px;
+        }
+        #chatgpt-settings a{
+            text-decoration-line: none;
+        }
       `;
 
             document.head.appendChild(style);
@@ -350,6 +375,20 @@
                 document.body.appendChild(chatWidgetContainer);
             }
 
+            let model = this.getOptionsStorage('model'), modelSelect4, modelSelect35, modelSelect3516k;
+            if(model == 'gpt-4'){
+                modelSelect4 = 'selected';
+                modelSelect35 = '';
+                modelSelect3516k = '';
+            }else if(model == 'gpt-3.5-turbo'){
+                modelSelect4 = '';
+                modelSelect35 = 'selected';
+                modelSelect3516k = '';
+            }else{
+                modelSelect4 = '';
+                modelSelect35 = '';
+                modelSelect3516k = 'selected';
+            }
             // Inject the HTML
             chatWidgetContainer.innerHTML = `
         <div id="chatgpt-widget-bubble" class="chatgpt-widget-w-10 chatgpt-widget-h-10 chatgpt-widget-rounded-full chatgpt-widget-flex chatgpt-widget-items-center chatgpt-widget-justify-center chatgpt-widget-cursor-pointer chatgpt-widget-text-3xl" style="background-color: ${this.def.theme.bubble.background_color};">
@@ -371,10 +410,35 @@
           <div id="chatgpt-widget-input-container" class="chatgpt-widget-p-4 chatgpt-widget-border-t chatgpt-widget-border-gray-200">
             <div class="chatgpt-widget-flex chatgpt-widget-space-x-4 chatgpt-widget-items-center">
               <textarea rows="1" id="chatgpt-widget-input" class="chatgpt-widget-flex-1 chatgpt-widget-border chatgpt-widget-border-gray-300 chatgpt-widget-rounded-md chatgpt-widget-px-4 chatgpt-widget-py-2 chatgpt-widget-outline-none chatgpt-widget-w-3/4" placeholder="${this.def.language.placeholder}"></textarea>
-              <a id="chatgpt-widget-clear-chat" class="chatgpt-widget-cursor-pointer" style="color: ${this.def.theme.clear_button.text_color};">${this.def.language.clear}</a>
+              <svg id="chatgpt-settings-button" xmlns="http://www.w3.org/2000/svg" class="chatgpt-widget-cursor-pointer" width="21px" height="21px" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+              </svg>
               <button id="chatgpt-widget-submit" class="chatgpt-widget-rounded-md chatgpt-widget-px-4 chatgpt-widget-py-2 chatgpt-widget-cursor-pointer" style="background-color: ${this.def.theme.send_button.background_color}; color: ${this.def.theme.send_button.text_color};">${this.def.language.send}</button>
             </div>
           </div>
+           <div id="chatgpt-settings" class="chatgpt-widget-hidden">
+                <div>${this.def.language.settings.model}: 
+                    <select class="chatgpt-options" data-name="model">
+                        <option value="gpt-4" ${modelSelect4}>gpt-4</option>
+                        <option value="gpt-3.5-turbo" ${modelSelect35}>gpt-3.5-turbo</option>
+                        <option value="gpt-3.5-turbo-16k" ${modelSelect3516k}>gpt-3.5-turbo-16k</option>
+                    </select>
+                </div>
+                <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" min="0" max="2"/></div>
+                <div>${this.def.language.settings.top_p}: <input class="chatgpt-options" data-name="top_p" value="${this.getOptionsStorage('top_p')}" type="number" min="0" max="1"/></div>
+                <div>${this.def.language.settings.max_history_size}: <input class="chatgpt-options" data-name="max_history_size" value="${this.getOptionsStorage('max_history_size')}" type="number" min="1" max="8"/></div>
+                <div>
+                    <a id="chatgpt-widget-clear-chat" class="chatgpt-widget-cursor-pointer" style="color: ${this.def.theme.clear_button.text_color};">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eraser" width="21" height="20" viewBox="0 0 21 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l10 -10a1 1 0 0 1 1.41 0l5 5a1 1 0 0 1 0 1.41l-9.2 9.3"></path>
+                            <path d="M18 13.3l-6.3 -6.3"></path>
+                        </svg>
+                        ${this.def.language.clear}
+                    </a>
+                </div>
+            </div>
         </div>
       `;
         },
@@ -387,6 +451,9 @@
             that.dom.chatPopup = document.getElementById('chatgpt-widget-popup');
             that.dom.closePopup = document.getElementById('chatgpt-widget-close-popup');
             that.dom.clearChat = document.getElementById('chatgpt-widget-clear-chat');
+            that.dom.chatSettingsButton = document.getElementById('chatgpt-settings-button');
+            that.dom.chatSettings = document.getElementById('chatgpt-settings');
+            that.dom.chatOptions = document.getElementsByClassName('chatgpt-options');
 
             that.dom.chatSubmit.addEventListener('click', function () {
 
@@ -428,13 +495,23 @@
                 that.reply(that.def.language.welcome);
                 that.dom.chatInput.focus();
             })
+
+            that.dom.chatSettingsButton.addEventListener('click', function(){
+                that.dom.chatSettings.classList.toggle('chatgpt-widget-hidden');
+            })
+            for(let i = 0; i < that.dom.chatOptions.length; i++){
+                that.dom.chatOptions[i].addEventListener('change', function(){
+                    that.setOptionsStorage(this.dataset.name, this.value);
+                })
+            }
+
         },
         sendChatCompletion: async (that) => {
             let data = {
-                model: that.def.model,
+                model: that.getOptionsStorage('model'),
                 stream: true,
-                temperature: that.def.temperature,
-                top_p: that.def.top_p,
+                temperature: that.getOptionsStorage('temperature'),
+                top_p: that.getOptionsStorage('top_p'),
                 messages: that.getMessageStorage(true)
             };
             console.log(data);
@@ -459,6 +536,8 @@
                     } else {
                         that.innerErrorText(replyElement, 'Error: Unknown error.');
                     }
+                    that.dom.chatInput.disabled = false;
+                    that.dom.chatInput.focus();
                     return;
                 }
                 // Read the response as a stream of data
@@ -508,6 +587,34 @@
         innerText: function (element, text) {
             element.innerText = text;
         },
+        getOptionsStorage: function(name){
+            let optionsString = localStorage.getItem('chatgpt-options'), options;
+            if(!optionsString){
+                options = this.def;
+            }else{
+                options = JSON.parse(optionsString);
+            }
+            return name ? options[name] : options;
+        },
+        setOptionsStorage: function(name, value){
+            let options = this.getOptionsStorage();
+            switch(name){
+                case 'temperature':
+                    if(value < 0) value = 0;
+                    if(value > 2) value = 2;
+                    break;
+                case 'top_p':
+                    if(value < 0) value = 0;
+                    if(value > 1) value = 1;
+                    break;
+                case 'max_history_size':
+                    if(value < 1) value = 1;
+                    if(value > 8) value = 8;
+                    break;
+            }
+            options[name] = value;
+            localStorage.setItem('chatgpt-options', JSON.stringify(options));
+        },
         getMessageStorage: function (withoutTime) {
             let messageHistory = localStorage.getItem('message');
             if (!messageHistory) {
@@ -523,7 +630,7 @@
         },
         setMessageStorage: function (role, message) {
             let messageHistory = this.getMessageStorage();
-            if (messageHistory.length >= this.def.max_history_size) {
+            if (messageHistory.length >= this.getOptionsStorage('max_history_size')) {
                 messageHistory.shift();
             }
             messageHistory.push({

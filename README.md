@@ -46,6 +46,12 @@ new chatgptWidget({
             months: 'months ago',
             years: 'years ago',
             hours: 'hours ago',
+        },
+        settings:{
+            model: 'OpenAI model',
+            temperature: 'Temperature(0-2)',
+            top_p: 'Top P(0-1)',
+            max_history_size: 'Max History Message Size',
         }
     },
     id: null,
