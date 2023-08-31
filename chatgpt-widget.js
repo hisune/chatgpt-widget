@@ -309,6 +309,7 @@
           z-index: 1999;
         }
         #chatgpt-widget-popup {
+          z-index: 1999;
           height: 85vh;
           max-height: 85vh;
           transition: all 0.3s;
@@ -322,6 +323,7 @@
         }
         @media (max-width: 576px) {
           #chatgpt-widget-popup {
+            z-index: 1999;
             position: fixed;
             top: 0;
             right: 0;
