@@ -51,7 +51,7 @@
                     model: 'OpenAI model',
                     temperature: 'Temperature(0-2)',
                     top_p: 'Top P(0-1)',
-                    max_history_size: 'Max History Message Size',
+                    max_history_size: 'Max History Message Size(1-10)',
                 }
             },
             id: null,
@@ -609,7 +609,7 @@
                     break;
                 case 'max_history_size':
                     if(value < 1) value = 1;
-                    if(value > 8) value = 8;
+                    if(value > 10) value = 10;
                     break;
             }
             options[name] = value;
