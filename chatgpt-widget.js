@@ -28,6 +28,7 @@
             top_p: 1,
             temperature: 0.7,
             model: 'gpt-4',
+            max_history_storage: 25,
             max_history_size: 8,
             language: {
                 title: 'Chat with AI',
@@ -51,7 +52,8 @@
                     model: 'OpenAI model',
                     temperature: 'Temperature(0-2)',
                     top_p: 'Top P(0-1)',
-                    max_history_size: 'Max History Message Size(1-10)',
+                    max_history_storage: 'Max History Message Storage(1-35)',
+                    max_history_size: 'Max History Message Sent(1-10)',
                 }
             },
             id: null,
@@ -359,6 +361,9 @@
             border-width: 1px;
             padding: 0 2px;
         }
+        #chatgpt-settings input{
+            width: 60px;
+        }
         #chatgpt-settings a{
             text-decoration-line: none;
         }
@@ -427,7 +432,8 @@
                 </div>
                 <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" min="0" max="2"/></div>
                 <div>${this.def.language.settings.top_p}: <input class="chatgpt-options" data-name="top_p" value="${this.getOptionsStorage('top_p')}" type="number" min="0" max="1"/></div>
-                <div>${this.def.language.settings.max_history_size}: <input class="chatgpt-options" data-name="max_history_size" value="${this.getOptionsStorage('max_history_size')}" type="number" min="1" max="8"/></div>
+                <div>${this.def.language.settings.max_history_size}: <input class="chatgpt-options" data-name="max_history_size" value="${this.getOptionsStorage('max_history_size')}" type="number" min="1" max="10"/></div>
+                <div>${this.def.language.settings.max_history_storage}: <input class="chatgpt-options" data-name="max_history_storage" value="${this.getOptionsStorage('max_history_storage') || this.def.max_history_storage}" type="number" min="1" max="35"/></div>
                 <div>
                     <a id="chatgpt-widget-clear-chat" class="chatgpt-widget-cursor-pointer" style="color: ${this.def.theme.clear_button.text_color};">
                          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eraser" width="21" height="20" viewBox="0 0 21 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -512,7 +518,7 @@
                 stream: true,
                 temperature: that.getOptionsStorage('temperature'),
                 top_p: that.getOptionsStorage('top_p'),
-                messages: that.getMessageStorage(true)
+                messages: that.getMessageStorage(true, true)
             };
             console.log(data);
             const id = that.reply('');
@@ -611,11 +617,15 @@
                     if(value < 1) value = 1;
                     if(value > 10) value = 10;
                     break;
+                case 'max_history_storage':
+                    if(value < 1) value = 1;
+                    if(value > 35) value = 35;
+                    break;
             }
             options[name] = value;
             localStorage.setItem('chatgpt-options', JSON.stringify(options));
         },
-        getMessageStorage: function (withoutTime) {
+        getMessageStorage: function (withoutTime, slice) {
             let messageHistory = localStorage.getItem('message');
             if (!messageHistory) {
                 return [];
@@ -626,11 +636,15 @@
                     delete messageHistoryJson[i].time;
                 }
             }
+            if(slice){
+                let maxSize = this.getOptionsStorage('max_history_size') || this.def.max_history_size;
+                messageHistoryJson = messageHistoryJson.slice(-Math.abs(maxSize));
+            }
             return messageHistoryJson;
         },
         setMessageStorage: function (role, message) {
             let messageHistory = this.getMessageStorage();
-            let maxSize = this.getOptionsStorage('max_history_size');
+            let maxSize = this.getOptionsStorage('max_history_storage') || this.def.max_history_storage;
             messageHistory = messageHistory.slice(-Math.abs(maxSize) + 1);
             messageHistory.push({
                 role: role,
