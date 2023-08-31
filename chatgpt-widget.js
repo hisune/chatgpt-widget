@@ -46,14 +46,24 @@
                     hours: 'hours ago',
                 }
             },
+            id: null,
             theme: {
+                container: {
+                    position: 'fixed',
+                    bottom: '10px',
+                    right: '20px',
+                },
                 bubble: {
                     text_color: '--tw-text-opacity: 1; color: rgba(255, 255, 255, var(--tw-text-opacity))',
-                    background_color: 'rgba(31, 41, 55)'
+                    background_color: 'rgba(31, 41, 55)',
+                    bubble_size: '40px',
+                    icon_size: '24px'
                 },
                 widget: {
                     background_color: 'rgba(255, 255, 255)',
-                    width: '32rem'
+                    width: '512px',
+                    bottom: '48px',
+                    top: 'auto'
                 },
                 title: {
                     text_color: 'rgba(255, 255, 255)',
@@ -133,10 +143,10 @@
           border-color: currentColor; /* 2 */
         }
         .chatgpt-widget-w-10 {
-          width: 2.5rem;
+          width: ${this.def.theme.bubble.bubble_size};
         }
         .chatgpt-widget-h-10 {
-          height: 2.5rem;
+          height: ${this.def.theme.bubble.bubble_size};
         }
         .chatgpt-widget-rounded-full {
           border-radius: 9999px;
@@ -151,26 +161,27 @@
           justify-content: center;
         }
         .chatgpt-widget-text-3xl {
-          font-size: 1.875rem;
-          line-height: 2.25rem;
+          font-size: 30px;
+          line-height: 36px;
         }
         .chatgpt-widget-w-6 {
-          width: 1.5rem;
+          width: ${this.def.theme.bubble.icon_size};
         }
         .chatgpt-widget-h-6 {
-          height: 1.5rem;
+          height: ${this.def.theme.bubble.icon_size};
         }
         .chatgpt-widget-absolute {
           position: absolute;
         }
         .chatgpt-widget-bottom-12 {
-          bottom: 3rem;
+          bottom: ${this.def.theme.widget.bottom};
+          top: ${this.def.theme.widget.top};
         }
         .chatgpt-widget-right-0 {
           right: 0px;
         }
         .chatgpt-widget-rounded-md {
-          border-radius: 0.375rem;
+          border-radius: 6px;
         }
         .chatgpt-widget-shadow-md {
           --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -185,33 +196,33 @@
           transition-duration: 150ms;
         }
         .chatgpt-widget-text-sm {
-          font-size: 0.875rem;
-          line-height: 1.25rem;
+          font-size: 14px;
+          line-height: 20px;
         }
         .chatgpt-widget-justify-between {
           justify-content: space-between;
         }
         .chatgpt-widget-p-1 {
-          padding: 0.3rem;
+          padding: 5px;
         }
         .chatgpt-widget-rounded-t-md {
-          border-top-left-radius: 0.375rem;
-          border-top-right-radius: 0.375rem;
+          border-top-left-radius: 6px;
+          border-top-right-radius: 6px;
         }
         .chatgpt-widget-m-0 {
           margin: 0px;
         }
         .chatgpt-widget-ml-2 {
-          margin-left: 0.5rem;
+          margin-left: 8px;
         }
         .chatgpt-widget-text-xss {
-          font-size: 0.65rem;
-          line-height: 0.65rem;
-          padding-bottom: 0.2rem;
+          font-size: 10px;
+          line-height: 10px;
+          padding-bottom: 3px;
         }
         .chatgpt-widget-text-xs {
-          font-size: 0.75rem;
-          line-height: 1rem;
+          font-size: 12px;
+          line-height: 16px;
         }
         .chatgpt-widget-cursor-pointer {
           cursor: pointer;
@@ -220,7 +231,7 @@
           flex: 1 1 0%;
         }
         .chatgpt-widget-p-4 {
-          padding: 1rem;
+          padding: 16px;
         }
         .chatgpt-widget-overflow-y-auto {
           overflow-y: auto;
@@ -234,8 +245,8 @@
         }
         .chatgpt-widget-space-x-4 > :not([hidden]) ~ :not([hidden]) {
           --tw-space-x-reverse: 0;
-          margin-right: calc(1rem * var(--tw-space-x-reverse));
-          margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
+          margin-right: calc(16px * var(--tw-space-x-reverse));
+          margin-left: calc(16px * calc(1 - var(--tw-space-x-reverse)));
         }
         .chatgpt-widget-border {
           border-width: 1px;
@@ -245,16 +256,16 @@
           border-color: rgba(209, 213, 219, var(--tw-border-opacity));
         }
         .chatgpt-widget-px-4 {
-          padding-left: 1rem;
-          padding-right: 1rem;
+          padding-left: 16px;
+          padding-right: 16px;
         }
         .chatgpt-widget-mx-1 {
-          padding-left: 0.25rem;
-          padding-right: 0.25rem;
+          padding-left: 4px;
+          padding-right: 4px;
         }
         .chatgpt-widget-py-2 {
-          padding-top: 0.5rem;
-          padding-bottom: 0.5rem;
+          padding-top: 8px;
+          padding-bottom: 8px;
         }
         .chatgpt-widget-outline-none {
           outline: 2px solid transparent;
@@ -267,10 +278,10 @@
           justify-content: flex-end;
         }
         .chatgpt-widget-rounded-lg {
-          border-radius: 0.5rem;
+          border-radius: 8px;
         }
         .chatgpt-widget-mb-3 {
-          margin-bottom: 0.75rem;
+          margin-bottom: 12px;
         }
         .chatgpt-widget-hidden {
           display: none;
@@ -291,9 +302,9 @@
             border-top: none;
         }
         #chatgpt-widget-container {
-          position: fixed;
-          bottom: 10px;
-          right: 20px;
+          position: ${this.def.theme.container.position};
+          bottom: ${this.def.theme.container.bottom};
+          right: ${this.def.theme.container.right};
           flex-direction: column;
           z-index: 1999;
         }
@@ -329,7 +340,11 @@
             // Create chat widget container
             const chatWidgetContainer = document.createElement('div');
             chatWidgetContainer.id = 'chatgpt-widget-container';
-            document.body.appendChild(chatWidgetContainer);
+            if(this.def.id){
+                document.getElementById(this.def.id).appendChild(chatWidgetContainer);
+            }else{
+                document.body.appendChild(chatWidgetContainer);
+            }
 
             // Inject the HTML
             chatWidgetContainer.innerHTML = `
