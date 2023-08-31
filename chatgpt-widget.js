@@ -37,10 +37,12 @@
                 placeholder: 'New lines(Ctrl+Enter)',
                 ago: {
                     day: 'day ago',
+                    week: 'week ago',
                     month: 'month ago',
                     year: 'year ago',
                     hour: 'hour ago',
                     days: 'days ago',
+                    weeks: 'weeks ago',
                     months: 'months ago',
                     years: 'years ago',
                     hours: 'hours ago',
