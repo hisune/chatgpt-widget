@@ -630,9 +630,8 @@
         },
         setMessageStorage: function (role, message) {
             let messageHistory = this.getMessageStorage();
-            if (messageHistory.length >= this.getOptionsStorage('max_history_size')) {
-                messageHistory.shift();
-            }
+            let maxSize = this.getOptionsStorage('max_history_size');
+            messageHistory = messageHistory.slice(-Math.abs(maxSize) + 1);
             messageHistory.push({
                 role: role,
                 content: message,
