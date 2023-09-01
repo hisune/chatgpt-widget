@@ -529,6 +529,7 @@
             const id = that.reply('', now);
             const replyElement = document.getElementById(id);
             replyElement.innerHTML = that.loadingSvg;
+            that.scrollToBottom();
             that.dom.chatInput.disabled = true;
             try {
                 let response = await fetch(that.def.endpoint, {
@@ -549,6 +550,7 @@
                     }
                     that.dom.chatInput.disabled = false;
                     that.dom.chatInput.focus();
+                    that.scrollToBottom();
                     return;
                 }
                 // Read the response as a stream of data
@@ -587,6 +589,7 @@
             } catch (e) {
                 console.log(e);
                 that.innerErrorText(replyElement, 'Error: API fetch error.');
+                that.scrollToBottom();
             }
             that.dom.chatInput.disabled = false;
             that.dom.chatInput.focus();
