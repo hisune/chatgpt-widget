@@ -292,9 +292,6 @@
         .chatgpt-widget-mb-3 {
           margin-bottom: 12px;
         }
-        .chatgpt-widget-hidden {
-          display: none;
-        }
         .chatgpt-widget-text-red-500 {
           --tw-text-opacity: 1;
           color: rgba(239, 68, 68, var(--tw-text-opacity));
@@ -370,6 +367,9 @@
         }
         #chatgpt-settings a{
             text-decoration-line: none;
+        }
+        .chatgpt-widget-hidden {
+            display: none;
         }
       `;
 
@@ -818,10 +818,17 @@
         reply: function (message, timestamp) {
             const chatMessages = document.getElementById('chatgpt-widget-messages');
             const replyElement = document.createElement('div');
-            const refreshAll = document.getElementsByClassName('chatgpt-actions-refresh');
-            for(let i = 0; i < refreshAll.length; i++){
-                refreshAll[i].parentNode.removeChild(refreshAll[i]);
+            let refreshClass = '';
+            if(message === this.def.language.welcome){
+                refreshClass = 'chatgpt-widget-hidden';
+            }else{
+                const refreshAll = document.getElementsByClassName('chatgpt-actions-refresh');
+                for(let i = 0; i < refreshAll.length; i++){
+                    refreshAll[i].parentNode.removeChild(refreshAll[i]);
+                }
+                refreshClass = '';
             }
+            console.log(refreshClass);
             message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
             let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
@@ -837,7 +844,7 @@
                       <svg data-id="${id}" class="chatgpt-actions-copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                       <svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                   </div>
-                  <div class="chatgpt-actions-refresh chatgpt-inline">
+                  <div class="chatgpt-actions-refresh chatgpt-inline ${refreshClass}">
                       <svg data-id="${id}" class="chatgpt-actions-refresh-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"> <path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
                   </div>
                   <div class="chatgpt-actions-delete chatgpt-inline">
