@@ -828,7 +828,6 @@
                 }
                 refreshClass = '';
             }
-            console.log(refreshClass);
             message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
             let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
