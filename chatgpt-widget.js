@@ -272,10 +272,6 @@
           padding-left: 16px;
           padding-right: 16px;
         }
-        .chatgpt-widget-mx-1 {
-          padding-left: 4px;
-          padding-right: 4px;
-        }
         .chatgpt-widget-py-2 {
           padding-top: 8px;
           padding-bottom: 8px;
@@ -303,10 +299,18 @@
           --tw-text-opacity: 1;
           color: rgba(239, 68, 68, var(--tw-text-opacity));
         }
-        .chatgpt-widget-time{
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end; /* Align content to the bottom */
+        .chatgpt-actions-user{
+          text-align: left;
+        }
+        .chatgpt-actions-bot{
+          text-align: right;
+        }
+        .chatgpt-actions-copy, .chatgpt-actions-refresh, .chatgpt-actions-delete {
+          cursor: pointer;
+        }
+        .chatgpt-inline{
+          display: inline;
+          margin: 0 1px;
         }
         #chatgpt-widget-messages, #chatgpt-widget-input-container{
             border-color: rgba(229, 213, 219);
@@ -497,8 +501,8 @@
 
             that.dom.clearChat.addEventListener('click', function () {
                 that.dom.chatMessages.innerHTML = '';
-                localStorage.setItem('message', '');
-                that.reply(that.def.language.welcome);
+                localStorage.setItem('chatgpt-messages', '');
+                that.reply(that.def.language.welcome, new Date().getTime());
                 that.dom.chatInput.focus();
             })
 
@@ -521,7 +525,8 @@
                 messages: that.getMessageStorage(true, true)
             };
             console.log(data);
-            const id = that.reply('');
+            const now = new Date().getTime();
+            const id = that.reply('', now);
             const replyElement = document.getElementById(id);
             replyElement.innerHTML = that.loadingSvg;
             that.dom.chatInput.disabled = true;
@@ -548,7 +553,6 @@
                 }
                 // Read the response as a stream of data
                 const reader = response.body?.getReader();
-                console.log('continue ->');
 
                 while (true) {
                     const {done, value} = await reader.read();
@@ -578,7 +582,8 @@
                     that.scrollToBottom();
                 }
                 console.log('AI response: ' + replyElement.innerText);
-                that.setMessageStorage('assistant', replyElement.innerText);
+                that.setMessageStorage('assistant', replyElement.innerText, now);
+                replyElement.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
             } catch (e) {
                 console.log(e);
                 that.innerErrorText(replyElement, 'Error: API fetch error.');
@@ -625,13 +630,13 @@
             options[name] = value;
             localStorage.setItem('chatgpt-options', JSON.stringify(options));
         },
-        getMessageStorage: function (withoutTime, slice) {
-            let messageHistory = localStorage.getItem('message');
+        getMessageStorage: function (withoutExtend, slice) {
+            let messageHistory = localStorage.getItem('chatgpt-messages');
             if (!messageHistory) {
                 return [];
             }
             let messageHistoryJson = JSON.parse(messageHistory);
-            if (withoutTime) {
+            if (withoutExtend) {
                 for (let i in messageHistoryJson) {
                     delete messageHistoryJson[i].time;
                 }
@@ -642,16 +647,30 @@
             }
             return messageHistoryJson;
         },
-        setMessageStorage: function (role, message) {
+        setMessageStorage: function (role, content, timestamp) {
             let messageHistory = this.getMessageStorage();
             let maxSize = this.getOptionsStorage('max_history_storage') || this.def.max_history_storage;
-            messageHistory = messageHistory.slice(-Math.abs(maxSize) + 1);
-            messageHistory.push({
+            let time = timestamp || new Date().getTime();
+            let message = {
                 role: role,
-                content: message,
-                time: new Date().getTime()
-            })
-            localStorage.setItem('message', JSON.stringify(messageHistory));
+                content: content,
+                time: time,
+            };
+            messageHistory = messageHistory.slice(-Math.abs(maxSize) + 1);
+            messageHistory.push(message)
+            localStorage.setItem('chatgpt-messages', JSON.stringify(messageHistory));
+            return message;
+        },
+        deleteMessageStorage: function(id){
+            console.log('delete id ' + id);
+            let messages = this.getMessageStorage();
+            for(let i in messages){
+                if('m' + messages[i].time === id){
+                    console.log('deleted index ' + i);
+                    messages.splice(i, 1)
+                }
+            }
+            localStorage.setItem('chatgpt-messages', JSON.stringify(messages));
         },
         togglePopup: function () {
             const chatPopup = document.getElementById('chatgpt-widget-popup');
@@ -663,13 +682,13 @@
                 this.scrollToBottom();
             }
         },
-        onUserRequest: function (message) {
+        onUserRequest: function (text) {
             // Handle user request here
-            console.log('User request:', message);
-            this.setMessageStorage('user', message)
+            console.log('User request:', text);
+            let message = this.setMessageStorage('user', text)
 
             // Display user message
-            this.ask(message);
+            this.ask(text, message.time);
 
             // Reply to the user
             this.sendChatCompletion(this);
@@ -713,35 +732,126 @@
             const date = new Date(timestamp);
             return this.wrapTimeTitle(timestamp, `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`);
         },
+        refreshLastAnswer: function(obj){
+            let messageContainer = document.getElementById(obj.dataset.id).parentNode.parentNode
+            messageContainer.parentNode.removeChild(messageContainer);
+            this.deleteMessageStorage(obj.dataset.id);
+            this.sendChatCompletion(this);
+        },
+        copyMessage: function(obj){
+            this.copyToClipboard(document.getElementById(obj.dataset.id).innerText.trim(), function(err){
+                if(!err){
+                    obj.classList.toggle('chatgpt-widget-hidden');
+                    obj.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
+                    setTimeout(function(){
+                        obj.classList.toggle('chatgpt-widget-hidden');
+                        obj.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
+                    }, 2000);
+                }
+            });
+        },
+        copyToClipboard: function(text, callback){
+            const type = 'text/plain';
+            const blob = new Blob([text], {type});
+            const data = [new ClipboardItem({[type]: blob})];
+            navigator.clipboard.write(data).then(function() {
+                console.log('Copied to clipboard!');
+                callback(null);
+            }, function() {
+                console.log('Failed to copy to clipboard.');
+                callback('Failed to copy to clipboard.');
+            });
+        },
+        addEventCopy: function(element){
+            let that = this;
+            element.querySelector('.chatgpt-actions-copy-icon').addEventListener('click', function(){
+                that.copyMessage(this);
+            });
+        },
+        addEventRefresh: function(element){
+            let that = this;
+            element.querySelector('.chatgpt-actions-refresh-icon').addEventListener('click', function(){
+                that.refreshLastAnswer(this);
+            });
+        },
+        addEventDelete: function(element){
+            let that = this;
+            element.querySelector('.chatgpt-actions-delete-icon').addEventListener('click', function(){
+                let messageContainer = document.getElementById(this.dataset.id).parentNode.parentNode
+                messageContainer.parentNode.removeChild(messageContainer);
+                that.deleteMessageStorage(this.dataset.id);
+            });
+        },
         ask: function (message, timestamp) {
             message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
             const messageElement = document.createElement('div');
+            let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
             messageElement.className = 'chatgpt-widget-flex chatgpt-widget-justify-end chatgpt-widget-mb-3';
             messageElement.innerHTML = `
-        <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">${time}</div>
         <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
-          ${message}
+          <div id="${id}" class="chatgpt-messages">
+              ${message}
+          </div>
+          <div class="chatgpt-actions-user">
+              <div class="chatgpt-actions-copy chatgpt-inline">
+                  <svg data-id="${id}" class="chatgpt-actions-copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <div class="chatgpt-actions-delete chatgpt-inline">
+                  <svg data-id="${id}" class="chatgpt-actions-delete-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              </div>
+              <div class="chatgpt-actions-time chatgpt-inline chatgpt-widget-text-xss" style="color: ${this.def.theme.user_message.text_color}; opacity: 0.3;">
+                ${time}
+              </div>
+          </div>
         </div>
       `;
+            this.addEventCopy(messageElement);
+            this.addEventDelete(messageElement);
             this.dom.chatMessages.appendChild(messageElement);
             this.dom.chatMessages.scrollTop = this.dom.chatMessages.scrollHeight;
 
             this.dom.chatInput.value = '';
+            return id;
         },
         reply: function (message, timestamp) {
             const chatMessages = document.getElementById('chatgpt-widget-messages');
             const replyElement = document.createElement('div');
-            const id = 'reply' + (new Date()).getTime();
+            const refreshAll = document.getElementsByClassName('chatgpt-actions-refresh');
+            for(let i = 0; i < refreshAll.length; i++){
+                refreshAll[i].parentNode.removeChild(refreshAll[i]);
+            }
             message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
+            let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
+            let hidden = message === '' ? 'chatgpt-widget-hidden' : '';
             replyElement.className = 'chatgpt-widget-flex chatgpt-widget-mb-3';
             replyElement.innerHTML = `
-        <div id="${id}" class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
-          ${message}
+        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
+              <div id="${id}" class="chatgpt-messages">
+                  ${message}
+              </div>    
+              <div class="chatgpt-actions-bot ${hidden}">
+                  <div class="chatgpt-actions-copy chatgpt-inline">
+                      <svg data-id="${id}" class="chatgpt-actions-copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      <svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <div class="chatgpt-actions-refresh chatgpt-inline">
+                      <svg data-id="${id}" class="chatgpt-actions-refresh-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"> <path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
+                  </div>
+                  <div class="chatgpt-actions-delete chatgpt-inline">
+                      <svg data-id="${id}" class="chatgpt-actions-delete-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  </div>
+                  <div class="chatgpt-actions-time chatgpt-inline chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">
+                    ${time}
+                  </div>
+              </div>
         </div>
-        <div class="chatgpt-widget-mx-1 chatgpt-widget-time chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">${time}</div>
       `;
+            this.addEventCopy(replyElement);
+            this.addEventRefresh(replyElement);
+            this.addEventDelete(replyElement);
             chatMessages.appendChild(replyElement);
             chatMessages.scrollTop = chatMessages.scrollHeight;
             return id;
@@ -762,8 +872,9 @@
                     lastTimestamp = chatMessagesHistory[key].time || new Date().getTime();
                 }
             }
-            if (new Date().getTime() - lastTimestamp > 86400000) {
-                this.reply(this.def.language.welcome);
+            let now = new Date().getTime();
+            if (now - lastTimestamp > 86400000) {
+                this.reply(this.def.language.welcome, now);
             }
         }
     };
