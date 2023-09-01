@@ -434,8 +434,8 @@
                         <option value="gpt-3.5-turbo-16k" ${modelSelect3516k}>gpt-3.5-turbo-16k</option>
                     </select>
                 </div>
-                <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" min="0" max="2"/></div>
-                <div>${this.def.language.settings.top_p}: <input class="chatgpt-options" data-name="top_p" value="${this.getOptionsStorage('top_p')}" type="number" min="0" max="1"/></div>
+                <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" step="0.1" min="0" max="2"/></div>
+                <div>${this.def.language.settings.top_p}: <input class="chatgpt-options" data-name="top_p" value="${this.getOptionsStorage('top_p')}" type="number" step="0.1" min="0" max="1"/></div>
                 <div>${this.def.language.settings.max_history_size}: <input class="chatgpt-options" data-name="max_history_size" value="${this.getOptionsStorage('max_history_size')}" type="number" min="1" max="10"/></div>
                 <div>${this.def.language.settings.max_history_storage}: <input class="chatgpt-options" data-name="max_history_storage" value="${this.getOptionsStorage('max_history_storage') || this.def.max_history_storage}" type="number" min="1" max="45"/></div>
                 <div>
@@ -520,8 +520,8 @@
             let data = {
                 model: that.getOptionsStorage('model'),
                 stream: true,
-                temperature: that.getOptionsStorage('temperature'),
-                top_p: that.getOptionsStorage('top_p'),
+                temperature: parseFloat(that.getOptionsStorage('temperature')),
+                top_p: parseFloat(that.getOptionsStorage('top_p')),
                 messages: that.getMessageStorage(true, true)
             };
             console.log(data);
