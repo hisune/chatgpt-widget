@@ -600,6 +600,7 @@
             }
             that.dom.chatInput.disabled = false;
             that.dom.chatInput.focus();
+            that.scrollToBottom();
         },
         innerErrorText: function (element, text) {
             element.innerHTML = `<div class="chatgpt-widget-text-red-500">${text}</div>`;
