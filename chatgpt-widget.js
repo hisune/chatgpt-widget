@@ -59,7 +59,7 @@
                     retry: 'Retry send',
                     copy: 'Copy message',
                     delete: 'Delete message',
-                    forget: 'Forgot the above chat history',
+                    forget: 'Cut the above chat history',
                     forgotten: 'AI has forgotten the above chat memories',
                 }
             },
