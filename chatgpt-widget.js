@@ -839,6 +839,9 @@
             let that = this;
             element.querySelector('.chatgpt-actions-delete-icon').addEventListener('click', function(){
                 let messageContainer = document.getElementById(this.dataset.id).parentNode.parentNode
+                if(messageContainer.nextSibling && messageContainer.nextSibling.classList.contains('chatgpt-separator-forget')){
+                    localStorage.setItem('chatgpt-forget', messageContainer.previousSibling.dataset.id);
+                }
                 messageContainer.parentNode.removeChild(messageContainer);
                 that.deleteMessageStorage(this.dataset.id);
             });
@@ -857,6 +860,9 @@
             forgetElement.innerText = this.def.language.actions.forgotten;
             let widgetElement = document.getElementById(id).parentNode.parentNode;
             widgetElement.parentNode.insertBefore(forgetElement, widgetElement.nextSibling);
+            if(widgetElement.parentNode.lastChild === forgetElement){
+                this.scrollToBottom();
+            }
         },
         clearForgetAll: function(){
             const forgetAll = document.getElementsByClassName('chatgpt-separator-forget');
@@ -911,7 +917,7 @@
       `;
             this.addActionsEvents(messageElement);
             this.dom.chatMessages.appendChild(messageElement);
-            this.dom.chatMessages.scrollTop = this.dom.chatMessages.scrollHeight;
+            this.scrollToBottom();
 
             this.dom.chatInput.value = '';
             return id;
@@ -938,7 +944,7 @@
       `;
             this.addActionsEvents(replyElement);
             this.dom.chatMessages.appendChild(replyElement);
-            this.dom.chatMessages.scrollTop = this.dom.chatMessages.scrollHeight;
+            this.scrollToBottom();
             return id;
         },
         scrollToBottom: function () {
