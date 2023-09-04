@@ -71,7 +71,7 @@
                 },
                 widget: {
                     background_color: 'rgba(255, 255, 255)',
-                    width: '512px',
+                    width: '600px',
                     bottom: '48px',
                     top: 'auto'
                 },
@@ -324,8 +324,8 @@
         }
         #chatgpt-widget-popup {
           z-index: 1999;
-          height: 85vh;
-          max-height: 85vh;
+          height: 88vh;
+          max-height: 88vh;
           transition: all 0.3s;
           overflow: hidden;
           width: ${this.def.theme.widget.width};
@@ -734,8 +734,23 @@
         },
         refreshLastAnswer: function(obj){
             let messageContainer = document.getElementById(obj.dataset.id).parentNode.parentNode
-            messageContainer.parentNode.removeChild(messageContainer);
-            this.deleteMessageStorage(obj.dataset.id);
+
+            let deleted = [];
+
+            if(messageContainer.dataset.type !== 'user'){
+                deleted.push(messageContainer);
+            }
+
+            let nextSibling = messageContainer.nextElementSibling;
+            while (nextSibling) {
+                deleted.push(nextSibling);
+                nextSibling = nextSibling.nextElementSibling;
+            }
+            for(let i in deleted){
+                console.log('delete------ ' + deleted[i].innerText);
+                this.deleteMessageStorage(deleted[i].dataset.id);
+                deleted[i].parentNode.removeChild(deleted[i]);
+            }
             this.sendChatCompletion(this);
         },
         copyMessage: function(obj){
@@ -788,6 +803,8 @@
             let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
             messageElement.className = 'chatgpt-widget-flex chatgpt-widget-justify-end chatgpt-widget-mb-3';
+            messageElement.dataset.id = id;
+            messageElement.dataset.type = 'user';
             messageElement.innerHTML = `
         <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
           <div id="${id}" class="chatgpt-messages">
@@ -797,6 +814,9 @@
               <div class="chatgpt-actions-copy chatgpt-inline">
                   <svg data-id="${id}" class="chatgpt-actions-copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                   <svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <div class="chatgpt-actions-refresh chatgpt-inline">
+                  <svg data-id="${id}" class="chatgpt-actions-refresh-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"> <path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
               </div>
               <div class="chatgpt-actions-delete chatgpt-inline">
                   <svg data-id="${id}" class="chatgpt-actions-delete-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -808,6 +828,7 @@
         </div>
       `;
             this.addEventCopy(messageElement);
+            this.addEventRefresh(messageElement);
             this.addEventDelete(messageElement);
             this.dom.chatMessages.appendChild(messageElement);
             this.dom.chatMessages.scrollTop = this.dom.chatMessages.scrollHeight;
@@ -821,18 +842,14 @@
             let refreshClass = '';
             if(message === this.def.language.welcome){
                 refreshClass = 'chatgpt-widget-hidden';
-            }else{
-                const refreshAll = document.getElementsByClassName('chatgpt-actions-refresh');
-                for(let i = 0; i < refreshAll.length; i++){
-                    refreshAll[i].parentNode.removeChild(refreshAll[i]);
-                }
-                refreshClass = '';
             }
             message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
             let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
             let hidden = message === '' ? 'chatgpt-widget-hidden' : '';
             replyElement.className = 'chatgpt-widget-flex chatgpt-widget-mb-3';
+            replyElement.dataset.id = id;
+            replyElement.dataset.type = 'assistant';
             replyElement.innerHTML = `
         <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
               <div id="${id}" class="chatgpt-messages">
