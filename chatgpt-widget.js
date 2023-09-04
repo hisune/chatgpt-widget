@@ -28,7 +28,7 @@
             top_p: 1,
             temperature: 0.7,
             model: 'gpt-4',
-            max_history_storage: 35,
+            max_history_storage: 45,
             max_history_size: 7,
             language: {
                 title: 'Chat with AI',
@@ -52,7 +52,7 @@
                     model: 'OpenAI model',
                     temperature: 'Temperature(0-2)',
                     top_p: 'Top P(0-1)',
-                    max_history_storage: 'Max History Message Storage(1-45)',
+                    max_history_storage: 'Max History Message Storage(1-75)',
                     max_history_size: 'Max History Message Sent(1-10)',
                 },
                 actions:{
@@ -444,7 +444,7 @@
                 <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" step="0.1" min="0" max="2"/></div>
                 <div>${this.def.language.settings.top_p}: <input class="chatgpt-options" data-name="top_p" value="${this.getOptionsStorage('top_p')}" type="number" step="0.1" min="0" max="1"/></div>
                 <div>${this.def.language.settings.max_history_size}: <input class="chatgpt-options" data-name="max_history_size" value="${this.getOptionsStorage('max_history_size')}" type="number" min="1" max="10"/></div>
-                <div>${this.def.language.settings.max_history_storage}: <input class="chatgpt-options" data-name="max_history_storage" value="${this.getOptionsStorage('max_history_storage') || this.def.max_history_storage}" type="number" min="1" max="45"/></div>
+                <div>${this.def.language.settings.max_history_storage}: <input class="chatgpt-options" data-name="max_history_storage" value="${this.getOptionsStorage('max_history_storage') || this.def.max_history_storage}" type="number" min="1" max="75"/></div>
                 <div>
                     <a id="chatgpt-widget-clear-chat" class="chatgpt-widget-cursor-pointer" style="color: ${this.def.theme.clear_button.text_color};">
                          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eraser" width="21" height="20" viewBox="0 0 21 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -634,7 +634,7 @@
                     break;
                 case 'max_history_storage':
                     if(value < 1) value = 1;
-                    if(value > 45) value = 45;
+                    if(value > 75) value = 75;
                     break;
             }
             options[name] = value;
