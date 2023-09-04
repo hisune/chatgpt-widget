@@ -54,6 +54,11 @@
                     top_p: 'Top P(0-1)',
                     max_history_storage: 'Max History Message Storage(1-45)',
                     max_history_size: 'Max History Message Sent(1-10)',
+                },
+                actions:{
+                    retry: 'Retry send',
+                    copy: 'Copy message',
+                    delete: 'Delete message'
                 }
             },
             id: null,
@@ -301,10 +306,7 @@
           --tw-text-opacity: 1;
           color: rgba(239, 68, 68, var(--tw-text-opacity));
         }
-        .chatgpt-actions-user{
-          text-align: left;
-        }
-        .chatgpt-actions-bot{
+        .chatgpt-actions{
           text-align: right;
         }
         .chatgpt-actions-copy, .chatgpt-actions-refresh, .chatgpt-actions-delete {
@@ -818,15 +820,15 @@
           <div id="${id}" class="chatgpt-messages">
               ${message}
           </div>
-          <div class="chatgpt-actions-user">
-              <div class="chatgpt-actions-copy chatgpt-inline">
+          <div class="chatgpt-actions">
+              <div title="${this.def.language.actions.copy}" class="chatgpt-actions-copy chatgpt-inline">
                   <svg data-id="${id}" class="chatgpt-actions-copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                   <svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </div>
-              <div class="chatgpt-actions-refresh chatgpt-inline">
+              <div title="${this.def.language.actions.retry}" class="chatgpt-actions-refresh chatgpt-inline">
                   <svg data-id="${id}" class="chatgpt-actions-refresh-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"> <path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
               </div>
-              <div class="chatgpt-actions-delete chatgpt-inline">
+              <div title="${this.def.language.actions.delete}" class="chatgpt-actions-delete chatgpt-inline">
                   <svg data-id="${id}" class="chatgpt-actions-delete-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
               </div>
               <div class="chatgpt-actions-time chatgpt-inline chatgpt-widget-text-xss" style="color: ${this.def.theme.user_message.text_color}; opacity: 0.3;">
@@ -863,15 +865,15 @@
               <div id="${id}" class="chatgpt-messages">
                   ${message}
               </div>    
-              <div class="chatgpt-actions-bot ${hidden}">
-                  <div class="chatgpt-actions-copy chatgpt-inline">
+              <div class="chatgpt-actions ${hidden}">
+                  <div title="${this.def.language.actions.copy}" class="chatgpt-actions-copy chatgpt-inline">
                       <svg data-id="${id}" class="chatgpt-actions-copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                       <svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                   </div>
-                  <div class="chatgpt-actions-refresh chatgpt-inline ${refreshClass}">
+                  <div title="${this.def.language.actions.retry}" class="chatgpt-actions-refresh chatgpt-inline ${refreshClass}">
                       <svg data-id="${id}" class="chatgpt-actions-refresh-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"> <path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
                   </div>
-                  <div class="chatgpt-actions-delete chatgpt-inline">
+                  <div title="${this.def.language.actions.delete}" class="chatgpt-actions-delete chatgpt-inline">
                       <svg data-id="${id}" class="chatgpt-actions-delete-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                   </div>
                   <div class="chatgpt-actions-time chatgpt-inline chatgpt-widget-text-xss" style="color: ${this.def.theme.time.text_color};">
