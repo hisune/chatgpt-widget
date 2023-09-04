@@ -71,7 +71,7 @@
                 },
                 widget: {
                     background_color: 'rgba(255, 255, 255)',
-                    width: '600px',
+                    width: '560px',
                     bottom: '48px',
                     top: 'auto'
                 },
@@ -155,6 +155,11 @@
           border-style: solid; /* 2 */
           border-color: currentColor; /* 2 */
         }
+        #chatgpt-widget-container br{
+            content: "";
+            margin: 10px;
+            display: block;
+        }
         .chatgpt-widget-w-10 {
           width: ${this.def.theme.bubble.bubble_size};
         }
@@ -210,7 +215,7 @@
         }
         .chatgpt-widget-text-sm {
           font-size: 14px;
-          line-height: 20px;
+          line-height: 19px;
         }
         .chatgpt-widget-justify-between {
           justify-content: space-between;
