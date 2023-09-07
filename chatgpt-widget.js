@@ -408,7 +408,7 @@
             margin-left: 20px;
         }
         .chatgpt-messages ul, .chatgpt-messages ol {
-            margin-left: 25px;
+            padding-inline-start: 25px;
         }
         .chatgpt-messages ul{
             list-style-type: circle;
