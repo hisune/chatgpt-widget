@@ -407,6 +407,9 @@
         .chatgpt-separator:not(:empty)::after {
             margin-left: 20px;
         }
+        .chatgpt-messages p {
+            margin: 8px 0;
+        }
         .chatgpt-messages ul, .chatgpt-messages ol {
             padding-inline-start: 25px;
         }
