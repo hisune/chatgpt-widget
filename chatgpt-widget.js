@@ -401,6 +401,41 @@
         .chatgpt-separator:not(:empty)::after {
             margin-left: 20px;
         }
+        .chatgpt-messages ul, .chatgpt-messages ol {
+            margin-left: 25px;
+        }
+        .chatgpt-messages ul{
+            list-style-type: circle;
+        }
+        .chatgpt-messages ol {
+            list-style-type: decimal;
+        }
+        .chatgpt-messages code{
+            padding: 2px 4px;
+            font-size: 90%;
+            color: #c7254e;
+            background-color: #f9f2f4;
+            border-radius: 4px;
+        }
+        .chatgpt-messages pre{
+            display: block;
+            padding: 9.5px;
+            margin: 0 0 10px;
+            font-size: 13px;
+            line-height: 1.42857143;
+            color: #333;
+            word-break: break-all;
+            word-wrap: break-word;
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        .chatgpt-messages blockquote {
+            padding: 5px 10px;
+            margin: 0 0 20px;
+            font-size: 16px;
+            border-left: 5px solid #bbb;
+        }
       `;
 
             document.head.appendChild(style);
@@ -616,6 +651,8 @@
                 console.log('AI response: ' + replyElement.innerText);
                 that.setMessageStorage('assistant', replyElement.innerText, now);
                 replyElement.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
+                replyElement.innerHTML = that.parseMarkdownToHtml(replyElement.innerText);
+                that.scrollToBottom();
             } catch (e) {
                 console.log(e);
                 that.innerErrorText(replyElement, 'Error: API fetch error.');
@@ -902,7 +939,7 @@
             this.addEventForget(element);
         },
         ask: function (message, timestamp) {
-            message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
+            message = this.parseMarkdownToHtml(message);
             const messageElement = document.createElement('div');
             let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
@@ -911,7 +948,7 @@
             messageElement.dataset.id = id;
             messageElement.dataset.type = 'user';
             messageElement.innerHTML = `
-        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
+        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="max-width: 100%; background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
           ${chatMessageHtml}
         </div>
       `;
@@ -929,7 +966,7 @@
                 welcomeHidden = 'chatgpt-widget-hidden';
             }
 
-            message = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
+            message = this.parseMarkdownToHtml(message);
             let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
             let hidden = message === '' ? 'chatgpt-widget-hidden' : '';
@@ -938,7 +975,7 @@
             replyElement.dataset.id = id;
             replyElement.dataset.type = 'assistant';
             replyElement.innerHTML = `
-        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
+        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="max-width: 100%; background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
             ${chatMessageHtml}
         </div>
       `;
@@ -946,6 +983,57 @@
             this.dom.chatMessages.appendChild(replyElement);
             this.scrollToBottom();
             return id;
+        },
+        parseMarkdownToHtml: function(md){
+            //ul
+            md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
+            md = md.replace(/^(\*.+)\s*\n([^\*])/gm, '$1\n</ul>\n\n$2');
+            md = md.replace(/^\*(.+)/gm, '<li>$1</li>');
+
+            md = md.replace(/^\s*\n\-/gm, '<ul>\n-');
+            md = md.replace(/^(\-.+)\s*\n([^\-])/gm, '$1\n</ul>\n\n$2');
+            md = md.replace(/^\-(.+)/gm, '<li>$1</li>');
+
+            //ol
+            md = md.replace(/^\s*\n\d\./gm, '<ol>\n1.');
+            md = md.replace(/^(\d\..+)\s*\n([^\d\.])/gm, '$1\n</ol>\n\n$2');
+            md = md.replace(/^\d\.(.+)/gm, '<li>$1</li>');
+
+            //blockquote
+            md = md.replace(/^\>(.+)/gm, '<blockquote>$1</blockquote>');
+
+            //images
+            md = md.replace(/\!\[([^\]]+)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1" />');
+
+            //links
+            md = md.replace(/[\[]{1}([^\]]+)[\]]{1}[\(]{1}([^\)\"]+)(\"(.+)\")?[\)]{1}/g, '<a href="$2" title="$4">$1</a>');
+
+            //font styles
+            md = md.replace(/[\*\_]{2}([^\*\_]+)[\*\_]{2}/g, '<b>$1</b>');
+            md = md.replace(/[\~]{2}([^\~]+)[\~]{2}/g, '<del>$1</del>');
+
+            //pre
+            md = md.replace(/^\s*\n\`\`\`(([^\s]+))?/gm, '<pre class="$2">');
+            md = md.replace(/^\`\`\`\s*\n/gm, '</pre>');
+
+            //code
+            md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code>');
+
+            //p
+            md = md.replace(/^\s*(\n)?(.+)/gm, function(m){
+                return  /\<(\/)?(h\d|ul|ol|li|blockquote|pre|img)/.test(m) ? m : '<p>'+m+'</p>';
+            });
+
+            //strip p from pre
+            md = md.replace(/(\<pre.+\>)\s*\n\<p\>(.+)\<\/p\>/gm, '$1$2').replace('<?', '&lt;?');
+            md = md.replace(/<pre[^>]*>[\s\S]*?<\/pre>/g, function(match) {
+                return match.replace(/<p>([\s\S]*?)<\/p>/g, function(match, innerContent) {
+                    return innerContent;
+                })
+            });
+console.log(md);
+            return md;
+
         },
         scrollToBottom: function () {
             document.getElementById("chatgpt-widget-messages").scrollTo(0, document.getElementById("chatgpt-widget-messages").scrollHeight);
