@@ -985,6 +985,14 @@
             return id;
         },
         parseMarkdownToHtml: function(md){
+            md = md.replace(/[&<>]/g, function(tag) {
+                let tagsToReplace = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;'
+                };
+                return tagsToReplace[tag] || tag;
+            })
             //ul
             md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
             md = md.replace(/^(\*.+)\s*\n([^\*])/gm, '$1\n</ul>\n\n$2');
@@ -1025,15 +1033,13 @@
             });
 
             //strip p from pre
-            md = md.replace(/(\<pre.+\>)\s*\n\<p\>(.+)\<\/p\>/gm, '$1$2').replace('<?', '&lt;?');
+            md = md.replace(/(\<pre.+\>)\s*\n\<p\>(.+)\<\/p\>/gm, '$1$2');
             md = md.replace(/<pre[^>]*>[\s\S]*?<\/pre>/g, function(match) {
                 return match.replace(/<p>([\s\S]*?)<\/p>/g, function(match, innerContent) {
                     return innerContent;
                 })
             });
-console.log(md);
             return md;
-
         },
         scrollToBottom: function () {
             document.getElementById("chatgpt-widget-messages").scrollTo(0, document.getElementById("chatgpt-widget-messages").scrollHeight);
