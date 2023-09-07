@@ -162,6 +162,12 @@
           border-style: solid; /* 2 */
           border-color: currentColor; /* 2 */
         }
+        #chatgpt-widget-container a {
+          text-decoration-line: underline;
+          text-decoration-style: dotted;
+          color: #337ab7;
+          text-decoration-color: #337ab7;
+        }
         #chatgpt-widget-container br{
             content: "";
             margin: 10px;
@@ -420,7 +426,7 @@
         .chatgpt-messages pre{
             display: block;
             padding: 9.5px;
-            margin: 0 0 10px;
+            margin: 10px 0 10px 0;
             font-size: 13px;
             line-height: 1.42857143;
             color: #333;
@@ -620,7 +626,7 @@
                 }
                 // Read the response as a stream of data
                 const reader = response.body?.getReader();
-
+                let responseText = '';
                 while (true) {
                     const {done, value} = await reader.read();
                     if (done) {
@@ -635,7 +641,7 @@
                             continue;
                         }
 
-                        const json = trimmedLine.replace("data: ", "");
+                        const json = line.replace("data: ", "");
                         const obj = JSON.parse(json);
 
                         const deltaText = obj?.choices?.[0]?.delta?.content;
@@ -643,15 +649,16 @@
                             if (replyElement.innerHTML === that.loadingSvg) {
                                 replyElement.innerHTML = '';
                             }
-                            that.innerText(replyElement, replyElement.innerText + deltaText);
+                            responseText += deltaText;
+                            that.innerText(replyElement, deltaText);
                         }
                     }
                     that.scrollToBottom();
                 }
-                console.log('AI response: ' + replyElement.innerText);
-                that.setMessageStorage('assistant', replyElement.innerText, now);
+                console.log('AI response: ' + responseText);
+                that.setMessageStorage('assistant', responseText, now);
                 replyElement.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
-                replyElement.innerHTML = that.parseMarkdownToHtml(replyElement.innerText);
+                replyElement.innerHTML = that.parseMarkdownToHtml(responseText);
                 that.scrollToBottom();
             } catch (e) {
                 console.log(e);
@@ -667,7 +674,7 @@
             this.scrollToBottom();
         },
         innerText: function (element, text) {
-            element.innerText = text;
+            element.innerText = element.innerText + text;
         },
         getOptionsStorage: function(name){
             let optionsString = localStorage.getItem('chatgpt-options'), options;
@@ -1021,8 +1028,11 @@
             md = md.replace(/[\~]{2}([^\~]+)[\~]{2}/g, '<del>$1</del>');
 
             //pre
-            md = md.replace(/^\s*\n\`\`\`(([^\s]+))?/gm, '<pre class="$2">');
-            md = md.replace(/^\`\`\`\s*\n/gm, '</pre>');
+            md = md.replace(/(.*?)\n```([^\n]*?)\n([\s\S]*?)```/gm, function(match, before, language, code) {
+                language = language.trim(); // 去除前后空格作为代码块语言
+                return before + '<pre class="' + language + '">' + code + '</pre>';
+            });
+
 
             //code
             md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code>');
