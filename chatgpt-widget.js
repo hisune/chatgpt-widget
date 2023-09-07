@@ -843,8 +843,10 @@
             }
             this.sendChatCompletion(this);
         },
-        copyMessage: function(obj){
-            this.copyToClipboard(document.getElementById(obj.dataset.id).innerText.trim(), function(err){
+        copyMessage: function(obj, message){
+            message = message || document.getElementById(obj.dataset.id).innerText.trim();
+            console.log(message);
+            this.copyToClipboard(message, function(err){
                 if(!err){
                     obj.classList.toggle('chatgpt-widget-hidden');
                     obj.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
@@ -991,6 +993,9 @@
             this.scrollToBottom();
             return id;
         },
+        copyCode: function(obj){
+            this.copyMessage(obj, obj.parentNode.previousSibling.innerText);
+        },
         parseMarkdownToHtml: function(md){
             md = md.replace(/[&<>]/g, function(tag) {
                 let tagsToReplace = {
@@ -1030,7 +1035,7 @@
             //pre
             md = md.replace(/(.*?)\n```([^\n]*?)\n([\s\S]*?)```/gm, function(match, before, language, code) {
                 language = language.trim(); // 去除前后空格作为代码块语言
-                return before + '<pre class="' + language + '">' + code + '</pre>';
+                return before + '<pre class="' + language + '">' + code + '</pre>' + '<div style="text-align: right;margin-top: -30px; padding-bottom: 10px; margin-right: 5px;"><svg onclick="chatgptWidget.prototype.copyCode(this)" style="cursor: pointer" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>';
             });
 
 
