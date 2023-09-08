@@ -441,13 +441,23 @@
             background-color: #f5f5f5;
             border: 1px dashed #ccc;
             border-radius: 4px;
-            overflow-x: auto;
+            overflow-x: scroll;
         }
         .chatgpt-messages blockquote {
             padding: 5px 10px;
             margin: 0 0 20px;
             font-size: 16px;
             border-left: 5px solid #bbb;
+        }
+        .chatgpt-messages table {
+          border-collapse: collapse;
+          margin: 12px 0;
+          background-color: #f5f5f5;
+        }
+        
+        .chatgpt-messages th, .chatgpt-messages td {
+          border: 1px solid #ccc;
+          padding: 4px 10px;
         }
       `;
 
@@ -1089,7 +1099,7 @@
             // code
             replace(rx_code, function(all, p1, p2, p3, p4) {
                 stash[--si] = element('pre',p3||p4.replace(/^    /gm, ''));
-                return si + '\uf8ff' + '<div style="text-align: right;margin-top: -30px; padding-bottom: 10px; margin-right: 5px;"><svg onclick="chatgptWidget.prototype.copyCode(this)" style="cursor: pointer" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>';
+                return si + '\uf8ff' + '<div style="text-align: right;margin-top: -45px; padding-bottom: 25px; margin-right: 5px;"><svg onclick="chatgptWidget.prototype.copyCode(this)" style="cursor: pointer" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>';
             });
 
 
@@ -1098,7 +1108,7 @@
                 stash[--si] = p4
                     ? p2
                         ? '<img src="' + p4 + '" alt="' + p3 + '"/>'
-                        : '<a href="' + p4 + '">' + unesc(highlight(p3)) + '</a>'
+                        : '<a href="' + p4 + '" target="_blank">' + unesc(highlight(p3)) + '</a>'
                     : p6;
                 return si + '\uf8ff';
             });
