@@ -78,7 +78,7 @@
                 },
                 widget: {
                     background_color: 'rgba(255, 255, 255)',
-                    width: '560px',
+                    width: '680px',
                     bottom: '48px',
                     top: 'auto'
                 },
@@ -350,7 +350,7 @@
           resize: none;
           overflow: hidden;
         }
-        @media (max-width: 576px) {
+        @media (max-width: 768px) {
           #chatgpt-widget-popup {
             z-index: 1999;
             position: fixed;
