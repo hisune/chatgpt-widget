@@ -617,8 +617,8 @@
             const id = that.reply('', now);
             const replyElement = document.getElementById(id);
             replyElement.innerHTML = that.loadingSvg;
-            that.scrollToBottom();
             that.dom.chatInput.disabled = true;
+            that.scrollToBottom();
             try {
                 let response = await fetch(that.def.endpoint, {
                     method: "POST",
@@ -724,6 +724,17 @@
             }
             options[name] = value;
             localStorage.setItem('chatgpt-options', JSON.stringify(options));
+        },
+        getMessageById: function(id){
+            let messages = localStorage.getItem('chatgpt-messages');
+            if(!messages) return null;
+            messages = JSON.parse(messages);
+            for(let i in messages){
+                if('m' + messages[i].time === id){
+                    return messages[i];
+                }
+            }
+            return null;
         },
         getMessageStorage: function (withoutExtend, slice) {
             let messageHistory = localStorage.getItem('chatgpt-messages');
@@ -861,7 +872,9 @@
             this.sendChatCompletion(this);
         },
         copyMessage: function(obj, message){
-            message = message || document.getElementById(obj.dataset.id).innerText.trim();
+            if(!message){
+                message = this.getMessageById(obj.dataset.id).content;
+            }
             console.log(message);
             this.copyToClipboard(message, function(err){
                 if(!err){
@@ -915,6 +928,7 @@
                 localStorage.setItem('chatgpt-forget', this.dataset.id);
                 that.clearForgetAll();
                 that.appendForget(this.dataset.id);
+                that.dom.chatInput.focus();
             });
         },
         appendForget: function(id){
