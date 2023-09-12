@@ -78,7 +78,7 @@
                 },
                 widget: {
                     background_color: 'rgba(255, 255, 255)',
-                    width: '560px',
+                    width: '680px',
                     bottom: '48px',
                     top: 'auto'
                 },
@@ -350,7 +350,7 @@
           resize: none;
           overflow: hidden;
         }
-        @media (max-width: 576px) {
+        @media (max-width: 768px) {
           #chatgpt-widget-popup {
             z-index: 1999;
             position: fixed;
@@ -407,14 +407,20 @@
         .chatgpt-separator:not(:empty)::after {
             margin-left: 20px;
         }
+        .chatgpt-messages p {
+            margin: 8px 0;
+        }
         .chatgpt-messages ul, .chatgpt-messages ol {
-            margin-left: 25px;
+            padding-inline-start: 25px;
         }
         .chatgpt-messages ul{
             list-style-type: circle;
         }
         .chatgpt-messages ol {
             list-style-type: decimal;
+        }
+        .chatgpt-messages li {
+            margin: 3px 0;
         }
         .chatgpt-messages code{
             padding: 2px 4px;
@@ -435,12 +441,23 @@
             background-color: #f5f5f5;
             border: 1px dashed #ccc;
             border-radius: 4px;
+            overflow-x: scroll;
         }
         .chatgpt-messages blockquote {
             padding: 5px 10px;
             margin: 0 0 20px;
             font-size: 16px;
             border-left: 5px solid #bbb;
+        }
+        .chatgpt-messages table {
+          border-collapse: collapse;
+          margin: 12px 0;
+          background-color: #f5f5f5;
+        }
+        
+        .chatgpt-messages th, .chatgpt-messages td {
+          border: 1px solid #ccc;
+          padding: 4px 10px;
         }
       `;
 
@@ -606,8 +623,8 @@
             const id = that.reply('', now);
             const replyElement = document.getElementById(id);
             replyElement.innerHTML = that.loadingSvg;
-            that.scrollToBottom();
             that.dom.chatInput.disabled = true;
+            that.scrollToBottom();
             try {
                 let response = await fetch(that.def.endpoint, {
                     method: "POST",
@@ -713,6 +730,17 @@
             }
             options[name] = value;
             localStorage.setItem('chatgpt-options', JSON.stringify(options));
+        },
+        getMessageById: function(id){
+            let messages = localStorage.getItem('chatgpt-messages');
+            if(!messages) return null;
+            messages = JSON.parse(messages);
+            for(let i in messages){
+                if('m' + messages[i].time === id){
+                    return messages[i];
+                }
+            }
+            return null;
         },
         getMessageStorage: function (withoutExtend, slice) {
             let messageHistory = localStorage.getItem('chatgpt-messages');
@@ -849,7 +877,9 @@
             this.sendChatCompletion(this);
         },
         copyMessage: function(obj, message){
-            message = message || document.getElementById(obj.dataset.id).innerText.trim();
+            if(!message){
+                message = this.getMessageById(obj.dataset.id).content;
+            }
             console.log(message);
             this.copyToClipboard(message, function(err){
                 if(!err){
@@ -903,6 +933,7 @@
                 localStorage.setItem('chatgpt-forget', this.dataset.id);
                 that.clearForgetAll();
                 that.appendForget(this.dataset.id);
+                that.dom.chatInput.focus();
             });
         },
         appendForget: function(id){
@@ -962,7 +993,7 @@
             messageElement.dataset.id = id;
             messageElement.dataset.type = 'user';
             messageElement.innerHTML = `
-        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="max-width: 100%; background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
+        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="max-width: -webkit-fill-available; background-color: ${this.def.theme.user_message.background_color}; color: ${this.def.theme.user_message.text_color};">
           ${chatMessageHtml}
         </div>
       `;
@@ -989,7 +1020,7 @@
             replyElement.dataset.id = id;
             replyElement.dataset.type = 'assistant';
             replyElement.innerHTML = `
-        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="max-width: 100%; background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
+        <div class="chatgpt-widget-rounded-lg chatgpt-widget-py-2 chatgpt-widget-px-4 max-w-[70%]" style="max-width: -webkit-fill-available; background-color: ${this.def.theme.bot_message.background_color}; color: ${this.def.theme.bot_message.text_color};">
             ${chatMessageHtml}
         </div>
       `;
@@ -1001,65 +1032,128 @@
         copyCode: function(obj){
             this.copyMessage(obj, obj.parentNode.previousSibling.innerText);
         },
-        parseMarkdownToHtml: function(md){
-            md = md.replace(/[&<>]/g, function(tag) {
-                let tagsToReplace = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;'
-                };
-                return tagsToReplace[tag] || tag;
-            })
-            //ul
-            md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
-            md = md.replace(/^(\*.+)\s*\n([^\*])/gm, '$1\n</ul>\n\n$2');
-            md = md.replace(/^\*(.+)/gm, '<li>$1</li>');
+        parseMarkdownToHtml: function(src){
+            let rx_lt = /</g;
+            let rx_gt = />/g;
+            let rx_space = /\t|\r|\uf8ff/g;
+            let rx_escape = /\\([\\\|`*_{}\[\]()#+\-~])/g;
+            let rx_hr = /^([*\-=_] *){3,}$/gm;
+            let rx_blockquote = /\n *&gt; *([^]*?)(?=(\n|$){2})/g;
+            let rx_list = /\n( *)(?:[*\-+]|((\d+)|([a-z])|[A-Z])[.)]) +([^]*?)(?=(\n|$){2})/g;
+            let rx_listjoin = /<\/(ol|ul)>\n\n<\1>/g;
+            let rx_highlight = /(^|[^A-Za-z\d\\])(([*_])|(~)|(\^)|(--)|(\+\+)|`)(\2?)([^<]*?)\2\8(?!\2)(?=\W|_|$)/g;
+            let rx_code = /\n((```|~~~).*\n?([^]*?)\n?\2|((    .*?\n)+))/g;
+            let rx_link = /((!?)\[(.*?)\]\((.*?)( ".*")?\)|\\([\\`*_{}\[\]()#+\-.!~]))/g;
+            let rx_table = /\n(( *\|.*?\| *\n)+)/g;
+            let rx_thead = /^.*\n( *\|( *\:?-+\:?-+\:? *\|)* *\n|)/;
+            let rx_row = /.*\n/g;
+            let rx_cell = /\||(.*?[^\\])\|/g;
+            let rx_heading = /(?=^|>|\n)([>\s]*?)(#{1,6}) (.*?)( #*)? *(?=\n|$)/g;
+            let rx_para = /(?=^|>|\n)\s*\n+([^<]+?)\n+\s*(?=\n|<|$)/g;
+            let rx_stash = /-\d+\uf8ff/g;
 
-            md = md.replace(/^\s*\n\-/gm, '<ul>\n-');
-            md = md.replace(/^(\-.+)\s*\n([^\-])/gm, '$1\n</ul>\n\n$2');
-            md = md.replace(/^\-(.+)/gm, '<li>$1</li>');
+            function replace(rex, fn) {
+                src = src.replace(rex, fn);
+            }
 
-            //ol
-            md = md.replace(/^\s*\n\d\./gm, '<ol>\n1.');
-            md = md.replace(/^(\d\..+)\s*\n([^\d\.])/gm, '$1\n</ol>\n\n$2');
-            md = md.replace(/^\d\.(.+)/gm, '<li>$1</li>');
+            function element(tag, content) {
+                return '<' + tag + '>' + content + '</' + tag + '>';
+            }
 
-            //blockquote
-            md = md.replace(/^\>(.+)/gm, '<blockquote>$1</blockquote>');
+            function blockquote(src) {
+                return src.replace(rx_blockquote, function(all, content) {
+                    return element('blockquote', blockquote(highlight(content.replace(/^ *&gt; */gm, ''))));
+                });
+            }
 
-            //images
-            md = md.replace(/\!\[([^\]]+)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1" />');
+            function list(src) {
+                return src.replace(rx_list, function(all, ind, ol, num, low, content) {
+                    let entry = element('li', highlight(content.split(
+                        RegExp('\n ?' + ind + '(?:(?:\\d+|[a-zA-Z])[.)]|[*\\-+]) +', 'g')).map(list).join('</li><li>')));
 
-            //links
-            md = md.replace(/[\[]{1}([^\]]+)[\]]{1}[\(]{1}([^\)\"]+)(\"(.+)\")?[\)]{1}/g, '<a href="$2" title="$4">$1</a>');
+                    return '\n' + (ol
+                        ? '<ol start="' + (num
+                        ? ol + '">'
+                        : parseInt(ol,36) - 9 + '" style="list-style-type:' + (low ? 'low' : 'upp') + 'er-alpha">') + entry + '</ol>'
+                        : element('ul', entry));
+                });
+            }
 
-            //font styles
-            md = md.replace(/[\*\_]{2}([^\*\_]+)[\*\_]{2}/g, '<b>$1</b>');
-            md = md.replace(/[\~]{2}([^\~]+)[\~]{2}/g, '<del>$1</del>');
+            function highlight(src) {
+                return src.replace(rx_highlight, function(all, _, p1, emp, sub, sup, small, big, p2, content) {
+                    return _ + element(
+                        emp ? (p2 ? 'strong' : 'em')
+                            : sub ? (p2 ? 's' : 'sub')
+                                : sup ? 'sup'
+                                    : small ? 'small'
+                                        : big ? 'big'
+                                            : 'code',
+                        highlight(content));
+                });
+            }
 
-            //pre
-            md = md.replace(/(.*?)\n```([^\n]*?)\n([\s\S]*?)```/gm, function(match, before, language, code) {
-                language = language.trim(); // 去除前后空格作为代码块语言
-                return before + '<pre class="' + language + '">' + code + '</pre>' + '<div style="text-align: right;margin-top: -30px; padding-bottom: 10px; margin-right: 5px;"><svg onclick="chatgptWidget.prototype.copyCode(this)" style="cursor: pointer" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>';
+            function unesc(str) {
+                return str.replace(rx_escape, '$1');
+            }
+
+            let stash = [];
+            let si = 0;
+
+            src = '\n' + src + '\n';
+
+            replace(rx_lt, '&lt;');
+            replace(rx_gt, '&gt;');
+            replace(rx_space, '  ');
+
+            // blockquote
+            src = blockquote(src);
+
+            // horizontal rule
+            replace(rx_hr, '<hr/>');
+
+            // list
+            src = list(src);
+            replace(rx_listjoin, '');
+
+            // code
+            replace(rx_code, function(all, p1, p2, p3, p4) {
+                stash[--si] = element('pre',p3||p4.replace(/^    /gm, ''));
+                return si + '\uf8ff' + '<div style="text-align: right;margin-top: -45px; padding-bottom: 25px; margin-right: 5px;"><svg onclick="chatgptWidget.prototype.copyCode(this)" style="cursor: pointer" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg class="chatgpt-actions-copy-done chatgpt-widget-hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>';
             });
 
 
-            //code
-            md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code>');
-
-            //p
-            md = md.replace(/^\s*(\n)?(.+)/gm, function(m){
-                return  /\<(\/)?(h\d|ul|ol|li|blockquote|pre|img)/.test(m) ? m : '<p>'+m+'</p>';
+            // link or image
+            replace(rx_link, function(all, p1, p2, p3, p4, p5, p6) {
+                stash[--si] = p4
+                    ? p2
+                        ? '<img src="' + p4 + '" alt="' + p3 + '"/>'
+                        : '<a href="' + p4 + '" target="_blank">' + unesc(highlight(p3)) + '</a>'
+                    : p6;
+                return si + '\uf8ff';
             });
 
-            //strip p from pre
-            md = md.replace(/(\<pre.+\>)\s*\n\<p\>(.+)\<\/p\>/gm, '$1$2');
-            md = md.replace(/<pre[^>]*>[\s\S]*?<\/pre>/g, function(match) {
-                return match.replace(/<p>([\s\S]*?)<\/p>/g, function(match, innerContent) {
-                    return innerContent;
-                })
+            // table
+            replace(rx_table, function(all, table) {
+                let sep = table.match(rx_thead)[1];
+                return '\n' + element('table',
+                    table.replace(rx_row, function(row, ri) {
+                        return row == sep ? '' : element('tr', row.replace(rx_cell, function(all, cell, ci) {
+                            return ci ? element(sep && !ri ? 'th' : 'td', unesc(highlight(cell || ''))) : ''
+                        }))
+                    })
+                )
             });
-            return md;
+
+            // heading
+            replace(rx_heading, function(all, _, p1, p2) { return _ + element('h' + p1.length, unesc(highlight(p2))) });
+
+            // paragraph
+            replace(rx_para, function(all, content) { return element('p', unesc(highlight(content))) });
+
+            // stash
+            replace(rx_stash, function(all) { return stash[parseInt(all)] });
+
+            return src.trim();
         },
         scrollToBottom: function () {
             document.getElementById("chatgpt-widget-messages").scrollTo(0, document.getElementById("chatgpt-widget-messages").scrollHeight);
