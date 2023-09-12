@@ -585,7 +585,13 @@
                     that.setOptionsStorage(this.dataset.name, this.value);
                 })
             }
-
+            document.addEventListener('click', function(event) {
+                let elementContainer = document.getElementById('chatgpt-widget-container');
+                let elementPopup = document.getElementById('chatgpt-widget-popup');
+                if (window.getComputedStyle(elementPopup).display !== 'none' && !elementContainer.contains(event.target)) {
+                    that.togglePopup();
+                }
+            });
         },
         sendChatCompletion: async (that) => {
             let data = {
@@ -763,11 +769,10 @@
             localStorage.setItem('chatgpt-messages', JSON.stringify(messages));
         },
         togglePopup: function () {
-            const chatPopup = document.getElementById('chatgpt-widget-popup');
-            chatPopup.classList.toggle('chatgpt-widget-hidden');
+            this.dom.chatPopup.classList.toggle('chatgpt-widget-hidden');
             document.getElementById('chatgpt-widget-expand').classList.toggle('chatgpt-widget-hidden');
             document.getElementById('chatgpt-widget-shrink').classList.toggle('chatgpt-widget-hidden');
-            if (!chatPopup.classList.contains('chatgpt-widget-hidden')) {
+            if (!this.dom.chatPopup.classList.contains('chatgpt-widget-hidden')) {
                 this.dom.chatInput.focus();
                 this.scrollToBottom();
             }
