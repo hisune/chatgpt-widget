@@ -579,11 +579,12 @@
 
             });
 
-            that.dom.chatInput.addEventListener('keyup', function (event) {
+            that.dom.chatInput.addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {
                     if (!event.ctrlKey) {
                         that.dom.chatSubmit.click();
                         that.dom.chatInput.rows = 1;
+                        event.preventDefault();
                     } else {
                         that.dom.chatInput.value += "\n";
                         that.dom.chatInput.rows = 2;
