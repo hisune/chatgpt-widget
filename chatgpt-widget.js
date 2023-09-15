@@ -267,6 +267,13 @@
         .chatgpt-widget-overflow-y-auto {
           overflow-y: auto;
         }
+        .chatgpt-widget-overflow-y-auto::-webkit-scrollbar {
+            width: 8px !important;
+        }
+        .chatgpt-widget-overflow-y-auto::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,.25);
+            border-radius: 4px;
+        }
         .chatgpt-widget-border-t {
           border-top-width: 1px;
         }
@@ -455,6 +462,13 @@
             border: 1px dashed #ccc;
             border-radius: 4px;
             overflow-x: auto;
+        }
+        .chatgpt-messages pre::-webkit-scrollbar {
+            height: 8px !important;
+        }
+        .chatgpt-messages pre::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,.25);
+            border-radius: 4px;
         }
         .chatgpt-messages blockquote {
             padding: 5px 10px;
