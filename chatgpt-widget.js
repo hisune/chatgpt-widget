@@ -449,6 +449,9 @@
             top: 4px;
             position: relative;
         }
+        .chatgpt-pre-head span{
+            color: #999999;
+        }
         .chatgpt-messages pre{
             display: block;
             padding: 9.5px;
