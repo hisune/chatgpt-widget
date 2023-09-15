@@ -29,7 +29,7 @@
             temperature: 0.7,
             model: 'gpt-4',
             max_history_storage: 45,
-            max_history_size: 7,
+            max_history_size: 5,
             language: {
                 title: 'Chat with AI',
                 welcome: 'Hello! How can I assist you today?',
