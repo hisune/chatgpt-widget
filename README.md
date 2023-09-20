@@ -11,7 +11,7 @@ Quickly deploy chatgpt chat widget to your website!
 - Supports message operations
 
 ### screenshot
-![230920 171434](https://github.com/hisune/chatgpt-widget/assets/7941669/dc6dc2ac-a6d2-4d7e-b959-fdc171378a30)
+<img src="https://github.com/hisune/chatgpt-widget/assets/7941669/dc6dc2ac-a6d2-4d7e-b959-fdc171378a30" width=600 />
 
 ### usage
 Add js asset to html header tag.
