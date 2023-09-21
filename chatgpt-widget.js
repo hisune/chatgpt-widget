@@ -370,6 +370,9 @@
             max-height: 100%;
             border-radius: 0;
           }
+          .chatgpt-widget-rounded-t-md{
+            border-radius: 0;
+          }
         }
         #chatgpt-settings{
             text-align: right;
