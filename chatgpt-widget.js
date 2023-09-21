@@ -903,7 +903,9 @@
             for(let i in deleted){
                 console.log('delete------ ' + deleted[i].innerText);
                 this.deleteMessageStorage(deleted[i].dataset.id);
-                deleted[i].parentNode.removeChild(deleted[i]);
+                setTimeout(function (){
+                    deleted[i].parentNode.removeChild(deleted[i]);
+                }, 0);
             }
             this.sendChatCompletion(this);
         },
