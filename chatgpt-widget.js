@@ -313,7 +313,7 @@
         }
         .chatgpt-widget-justify-start::before{
             position: absolute; 
-            top: 12px; 
+            top: 18px; 
             left: -8px; 
             border-top: 8px solid transparent; 
             border-bottom: 8px solid transparent; 
@@ -326,7 +326,7 @@
         }
         .chatgpt-widget-justify-end::before{
             position: absolute; 
-            top: 12px; 
+            top: 18px; 
             right: -8px; 
             border-top: 8px solid transparent; 
             border-bottom: 8px solid transparent; 
