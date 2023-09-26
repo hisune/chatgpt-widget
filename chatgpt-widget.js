@@ -308,8 +308,30 @@
         .chatgpt-widget-w-3\\/4 {
           width: 75%;
         }
+        .chatgpt-widget-justify-start{
+          position: relative;
+        }
+        .chatgpt-widget-justify-start::before{
+            position: absolute; 
+            top: 12px; 
+            left: -8px; 
+            border-top: 8px solid transparent; 
+            border-bottom: 8px solid transparent; 
+            border-right: 10px solid ${this.def.theme.bot_message.background_color};
+            content: '';  
+        }
         .chatgpt-widget-justify-end {
           justify-content: flex-end;
+          position: relative;
+        }
+        .chatgpt-widget-justify-end::before{
+            position: absolute; 
+            top: 12px; 
+            right: -8px; 
+            border-top: 8px solid transparent; 
+            border-bottom: 8px solid transparent; 
+            border-left: 10px solid ${this.def.theme.user_message.background_color};
+            content: '';  
         }
         .chatgpt-widget-rounded-lg {
           border-radius: 8px;
@@ -1054,7 +1076,7 @@
             let time = this.formatTimestamp(timestamp);
             let hidden = message === '' ? 'chatgpt-widget-hidden' : '';
             let chatMessageHtml = this.getChatMessageHtml(id, message, time, hidden, welcomeHidden);
-            replyElement.className = 'chatgpt-widget-flex chatgpt-widget-mb-3';
+            replyElement.className = 'chatgpt-widget-flex chatgpt-widget-justify-start chatgpt-widget-mb-3';
             replyElement.dataset.id = id;
             replyElement.dataset.type = 'assistant';
             replyElement.innerHTML = `
