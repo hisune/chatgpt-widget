@@ -27,7 +27,7 @@
             api_key: null,
             top_p: 1,
             temperature: 0.7,
-            model: 'gpt-4',
+            model: 'gpt-4-1106-preview',
             max_history_storage: 45,
             max_history_size: 5,
             language: {
@@ -528,7 +528,7 @@
             }
 
             let model = this.getOptionsStorage('model'), modelSelect4, modelSelect35, modelSelect3516k;
-            if(model == 'gpt-4'){
+            if(model == 'gpt-4-1106-preview'){
                 modelSelect4 = 'selected';
                 modelSelect35 = '';
                 modelSelect3516k = '';
@@ -572,9 +572,8 @@
            <div id="chatgpt-settings" class="chatgpt-widget-hidden">
                 <div>${this.def.language.settings.model}: 
                     <select class="chatgpt-options" data-name="model">
-                        <option value="gpt-4" ${modelSelect4}>gpt-4</option>
+                        <option value="gpt-4-1106-preview" ${modelSelect4}>gpt-4-1106-preview</option>
                         <option value="gpt-3.5-turbo" ${modelSelect35}>gpt-3.5-turbo</option>
-                        <option value="gpt-3.5-turbo-16k" ${modelSelect3516k}>gpt-3.5-turbo-16k</option>
                     </select>
                 </div>
                 <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" step="0.1" min="0" max="2"/></div>
@@ -667,8 +666,12 @@
             });
         },
         sendChatCompletion: async (that) => {
+            let model = that.getOptionsStorage('model');
+            if(model === 'gpt-4'){
+                model = 'gpt-4-1106-preview';
+            }
             let data = {
-                model: that.getOptionsStorage('model'),
+                model: model,
                 stream: true,
                 temperature: parseFloat(that.getOptionsStorage('temperature')),
                 top_p: parseFloat(that.getOptionsStorage('top_p')),
