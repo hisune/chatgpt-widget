@@ -532,7 +532,7 @@
                 modelSelect4 = 'selected';
                 modelSelect35 = '';
                 modelSelect3516k = '';
-            }else if(model == 'gpt-3.5-turbo'){
+            }else if(model == 'gpt-3.5-turbo-1106'){
                 modelSelect4 = '';
                 modelSelect35 = 'selected';
                 modelSelect3516k = '';
@@ -573,7 +573,7 @@
                 <div>${this.def.language.settings.model}: 
                     <select class="chatgpt-options" data-name="model">
                         <option value="gpt-4-1106-preview" ${modelSelect4}>gpt-4-1106-preview</option>
-                        <option value="gpt-3.5-turbo" ${modelSelect35}>gpt-3.5-turbo</option>
+                        <option value="gpt-3.5-turbo-1106" ${modelSelect35}>gpt-3.5-turbo-1106</option>
                     </select>
                 </div>
                 <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" step="0.1" min="0" max="2"/></div>
@@ -669,6 +669,8 @@
             let model = that.getOptionsStorage('model');
             if(model === 'gpt-4'){
                 model = 'gpt-4-1106-preview';
+            }else if(model === 'gpt-3.5-turbo'){
+                model = 'gpt-3.5-turbo-1106';
             }
             let data = {
                 model: model,
