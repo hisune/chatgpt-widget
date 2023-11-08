@@ -24,6 +24,8 @@
     chatgptWidget.prototype = {
         def: {
             endpoint: 'https://api.openai.com/v1/chat/completions',
+            endpoint_image_create: 'https:///api.openai.com/v1/images/generations',
+            image_proxy: 'https://opaiauth.sockio.com/imgProxy.php?url=',
             api_key: null,
             top_p: 1,
             temperature: 0.7,
@@ -52,8 +54,10 @@
                     model: 'OpenAI model',
                     temperature: 'Temperature(0-2)',
                     top_p: 'Top P(0-1)',
-                    max_history_storage: 'Max History Message Storage(1-75)',
-                    max_history_size: 'Max History Message Sent(1-10)',
+                    max_history_storage: 'Max history message storage(1-75)',
+                    max_history_size: 'Max history message sent(1-10)',
+                    image_generation: 'Image generation',
+                    image_size: 'Image size',
                 },
                 actions:{
                     retry: 'Retry send',
@@ -61,6 +65,10 @@
                     delete: 'Delete message',
                     forget: 'Cut the above chat history',
                     forgotten: 'AI has forgotten the above chat memories',
+                },
+                progress:{
+                    calling: 'AI is calling image create function...',
+                    generating: 'AI is generating...',
                 }
             },
             id: null,
@@ -527,19 +535,48 @@
                 document.body.appendChild(chatWidgetContainer);
             }
 
-            let model = this.getOptionsStorage('model'), modelSelect4, modelSelect35, modelSelect3516k;
-            if(model == 'gpt-4-1106-preview'){
-                modelSelect4 = 'selected';
-                modelSelect35 = '';
-                modelSelect3516k = '';
-            }else if(model == 'gpt-3.5-turbo-1106'){
-                modelSelect4 = '';
-                modelSelect35 = 'selected';
-                modelSelect3516k = '';
-            }else{
-                modelSelect4 = '';
-                modelSelect35 = '';
-                modelSelect3516k = 'selected';
+            let model = this.getOptionsStorage('model'), modelSelect4, modelSelect35;
+            switch (model){
+                case 'gpt-4-1106':
+                    modelSelect4 ='selected';
+                    modelSelect35 = '';
+                    break;
+                case 'gpt-3.5-turbo-1106':
+                    modelSelect4 = '';
+                    modelSelect35 ='selected';
+                    break;
+                default:
+                    modelSelect4 = '';
+                    modelSelect35 = '';
+            }
+            let imageSize = this.getOptionsStorage('image_size'), s1024, sw1792, sh1792;
+            switch (imageSize){
+                case '1024x1024':
+                    s1024 ='selected';
+                    sw1792 = '';
+                    sh1792 = '';
+                    break;
+                case '1792x1024':
+                    s1024 = '';
+                    sw1792 ='selected';
+                    sh1792 = '';
+                    break;
+                case '1024x1792':
+                    s1024 = '';
+                    sw1792 = '';
+                    sh1792 ='selected';
+                    break;
+            }
+            let imageGeneration = this.getOptionsStorage('image_generation'), imageGen0, imageGen1;
+            switch (imageGeneration){
+                case '0':
+                    imageGen0 ='selected';
+                    imageGen1 = '';
+                    break;
+                case '1':
+                    imageGen0 = '';
+                    imageGen1 ='selected';
+                    break;
             }
             // Inject the HTML
             chatWidgetContainer.innerHTML = `
@@ -577,9 +614,21 @@
                     </select>
                 </div>
                 <div>${this.def.language.settings.temperature}: <input class="chatgpt-options" data-name="temperature" value="${this.getOptionsStorage('temperature')}" type="number" step="0.1" min="0" max="2"/></div>
-                <div>${this.def.language.settings.top_p}: <input class="chatgpt-options" data-name="top_p" value="${this.getOptionsStorage('top_p')}" type="number" step="0.1" min="0" max="1"/></div>
                 <div>${this.def.language.settings.max_history_size}: <input class="chatgpt-options" data-name="max_history_size" value="${this.getOptionsStorage('max_history_size')}" type="number" min="1" max="10"/></div>
                 <div>${this.def.language.settings.max_history_storage}: <input class="chatgpt-options" data-name="max_history_storage" value="${this.getOptionsStorage('max_history_storage') || this.def.max_history_storage}" type="number" min="1" max="75"/></div>
+                <div>${this.def.language.settings.image_generation}:
+                    <select class="chatgpt-options" data-name="image_generation">
+                        <option value="0" ${imageGen0}>No</option>
+                        <option value="1" ${imageGen1}>Yes</option>
+                    </select>
+                </div>
+                <div>${this.def.language.settings.image_size}: 
+                    <select class="chatgpt-options" data-name="image_size">
+                        <option value="1024x1024" ${s1024}>1024x1024</option>
+                        <option value="1792x1024" ${sw1792}>1792x1024</option>
+                        <option value="1024x1792" ${sh1792}>1024x1792</option>
+                    </select>
+                </div>
                 <div>
                     <a id="chatgpt-widget-clear-chat" class="chatgpt-widget-cursor-pointer" style="color: ${this.def.theme.clear_button.text_color};">
                          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eraser" width="21" height="20" viewBox="0 0 21 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -665,6 +714,57 @@
                 }
             });
         },
+        sendImageGeneration: async (that, id, now, options) => {
+            let data = {
+                prompt: options.prompt,
+                // model: 'dall-e-2',
+                model: 'dall-e-3',
+                size: that.getOptionsStorage('image_size') || '1024x1024'
+                // size: '256x256',
+            };
+            console.log(JSON.stringify(data));
+            const replyElement = document.getElementById(id);
+            replyElement.innerHTML = that.loadingSvg + that.def.language.progress.generating;
+            try {
+                let response = await fetch(that.def.endpoint_image_create, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + that.def.api_key
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (response.status !== 200) {
+                    console.log('status ->  ' + response.status);
+                    let jsonResponse = await response.json();
+                    if (jsonResponse.hasOwnProperty('error')) {
+                        that.innerErrorText(replyElement, 'Error: ' + jsonResponse.error.message);
+                    } else {
+                        that.innerErrorText(replyElement, 'Error: Unknown error.');
+                    }
+                    that.dom.chatInput.disabled = false;
+                    that.dom.chatInput.focus();
+                    that.scrollToBottom();
+                    return;
+                }
+                let jsonResponse = await response.json();
+                console.log(jsonResponse);
+                const img = new Image();
+                img.onload = function() {
+                    that.setMessageStorage('assistant', '', now, jsonResponse.data[0].url);
+                    replyElement.innerHTML = that.imageHtml(jsonResponse.data[0].url);
+                    that.doForget(id);
+                    that.scrollToBottom();
+                };
+                img.src = that.def.image_proxy + encodeURIComponent(jsonResponse.data[0].url);
+            } catch (e) {
+                console.log(e);
+                that.scrollToBottom();
+            }
+            that.dom.chatInput.disabled = false;
+            that.dom.chatInput.focus();
+            that.scrollToBottom();
+        },
         sendChatCompletion: async (that) => {
             let model = that.getOptionsStorage('model');
             if(model === 'gpt-4'){
@@ -679,7 +779,29 @@
                 top_p: parseFloat(that.getOptionsStorage('top_p')),
                 messages: that.getMessageStorage(true, true)
             };
-            console.log(data);
+            if(that.getOptionsStorage('image_generation') === '1'){
+                data.tools = [
+                    {
+                        type: "function",
+                        function: {
+                            description: "If the user asks to draw a picture, the picture is generated based on the prompt word",
+                            name: "sendImageGeneration",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    prompt: {
+                                        type: "string",
+                                        description: "Generate specific prompt words to describe the content of the picture"
+                                    }
+                                },
+                                required: ["prompt"]
+                            }
+                        }
+                    }
+                ];
+                data.tool_choice = 'auto';
+            }
+            console.log(JSON.stringify(data));
             const now = new Date().getTime();
             const id = that.reply('', now);
             const replyElement = document.getElementById(id);
@@ -711,38 +833,92 @@
                 // Read the response as a stream of data
                 const reader = response.body?.getReader();
                 let responseText = '';
+                let functionName, functionArgs = '';
+
+                let buffer = new Uint8Array(512);
+                let bufferIdx = 0;
+
                 while (true) {
-                    const {done, value} = await reader.read();
-                    if (done) {
-                        break;
-                    }
+                    const { done, value } = await reader.read();
+                    if (done) break;
 
-                    const textDecoder = new TextDecoder("utf-8");
-                    const chunk = textDecoder.decode(value);
-                    for (const line of chunk.split("\n")) {
-                        const trimmedLine = line.trim();
-                        if (!trimmedLine || trimmedLine === "data: [DONE]") {
-                            continue;
-                        }
+                    for (let i = 0; i < value.byteLength; ++i) {
+                        // Write to the buffer until we reach a double new-line
+                        // delimiter
+                        buffer[bufferIdx++] = value[i];
 
-                        const json = line.replace("data: ", "");
-                        const obj = JSON.parse(json);
+                        if (bufferIdx >= 2 && value[i] == 10 && buffer[bufferIdx - 2] == 10) {
+                            // Handle one data object
+                            const lineBuffer = buffer.subarray(0, bufferIdx - 2);
+                            const decoder = new TextDecoder("utf-8");
+                            const line = decoder.decode(lineBuffer);
 
-                        const deltaText = obj?.choices?.[0]?.delta?.content;
-                        if (deltaText !== undefined) {
-                            if (replyElement.innerHTML === that.loadingSvg) {
-                                replyElement.innerHTML = '';
+                            // Each line starts with a "data: " prefix, followed by
+                            // the actual data, which is usually a JSON object
+                            if (line.indexOf('data: ') !== 0)
+                                throw new Error('Expected "data:" prefix in: ' + line);
+
+                            // Trim the "data: " prefix
+                            const dataStr = line.substring(6);
+
+                            // Stop if we reached the end of the stream
+                            if (dataStr === '[DONE]')
+                                break;
+
+                            // Parse and handle data
+                            const obj = JSON.parse(dataStr);
+
+                            const deltaText = obj?.choices?.[0]?.delta?.content;
+                            const toolCalls = obj?.choices?.[0]?.delta?.tool_calls;
+                            if (deltaText) {
+                                if (replyElement.innerHTML === that.loadingSvg) {
+                                    replyElement.innerHTML = '';
+                                }
+                                responseText += deltaText;
+                                that.innerText(replyElement, deltaText);
+                            }else if(toolCalls){
+                                if(toolCalls[0]?.function?.name){
+                                    functionName = toolCalls[0]?.function?.name;
+                                }
+                                if(toolCalls[0]?.function?.arguments === ''){
+                                    toolCalls[0].function.arguments = "\n";
+                                }
+                                if(toolCalls[0]?.function?.arguments){
+                                    functionArgs += toolCalls[0]?.function?.arguments;
+                                }
                             }
-                            responseText += deltaText;
-                            that.innerText(replyElement, deltaText);
+
+                            // Reset buffer and continue reading
+                            bufferIdx = 0;
                         }
                     }
                     that.scrollToBottom();
                 }
-                console.log('AI response: ' + responseText);
-                that.setMessageStorage('assistant', responseText, now);
-                replyElement.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
-                replyElement.innerHTML = that.parseMarkdownToHtml(responseText);
+                console.log('responseText: ' + responseText + ', functionName: ' + functionName + ', functionArgs: ' + functionArgs);
+                if(responseText){
+                    that.setMessageStorage('assistant', responseText, now);
+                    replyElement.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
+                    replyElement.innerHTML = that.parseMarkdownToHtml(responseText);
+                }else if(functionName && functionArgs){
+                    let functionArgsArray = functionArgs.split("\n"), prompt = [];
+                    for(let i in functionArgsArray){
+                        if(functionArgsArray[i] === '') continue;
+                        let functionArgsLine = JSON.parse(functionArgsArray[i]);
+                        prompt.push(functionArgsLine.prompt);
+                    }
+                    let functionArgsString = prompt.join(", ");
+                    console.log(functionArgsString);
+                    replyElement.nextElementSibling.classList.toggle('chatgpt-widget-hidden');
+                    replyElement.innerHTML = that.loadingSvg + that.def.language.progress.calling;
+                    switch (functionName){
+                        case 'sendImageGeneration':
+                            that.sendImageGeneration(that, id, now, {prompt: functionArgsString});
+                            break;
+                        default:
+                            that.innerErrorText(replyElement, 'Error: No such function, ' + functionName);
+                            that.scrollToBottom();
+                    }
+                }
                 that.scrollToBottom();
             } catch (e) {
                 console.log(e);
@@ -814,33 +990,44 @@
                 let maxSize = this.getOptionsStorage('max_history_size') || this.def.max_history_size;
                 messageHistoryJson = messageHistoryJson.slice(-Math.abs(maxSize));
                 let forgetId = localStorage.getItem('chatgpt-forget');
-                if(forgetId){
-                    for(let i in messageHistoryJson){
-                        if('m' + messageHistoryJson[i].time === forgetId){
-                            forgetIndex = i;
-                        }
+                for(let i in messageHistoryJson){
+                    if(forgetId && 'm' + messageHistoryJson[i].time === forgetId){
+                        forgetIndex = i;
                     }
-                }
-            }
-            if (withoutExtend) {
-                for (let i in messageHistoryJson) {
-                    delete messageHistoryJson[i].time;
+                    if(messageHistoryJson[i].image_url){
+                        forgetIndex = i;
+                        this.doForget('m' + messageHistoryJson[i].time)
+                    }
                 }
             }
             if(forgetIndex !== null){
                 messageHistoryJson = messageHistoryJson.slice(-(messageHistoryJson.length - forgetIndex - 1));
             }
+            if (withoutExtend) {
+                console.log(messageHistoryJson);
+                for (let i in messageHistoryJson) {
+                    if(messageHistoryJson[i] && messageHistoryJson[i].image_url){
+                        messageHistoryJson.splice(i, 1);
+                    }
+                }
+                for (let i in messageHistoryJson) {
+                    delete messageHistoryJson[i].time;
+                }
+            }
             return messageHistoryJson;
         },
-        setMessageStorage: function (role, content, timestamp) {
+        setMessageStorage: function (role, content, timestamp, imageUrl) {
             let messageHistory = this.getMessageStorage();
             let maxSize = this.getOptionsStorage('max_history_storage') || this.def.max_history_storage;
             let time = timestamp || new Date().getTime();
             let message = {
                 role: role,
                 content: content,
-                time: time,
+                time: time
             };
+            if(imageUrl){
+                message.image_url = imageUrl;
+            }
             messageHistory = messageHistory.slice(-Math.abs(maxSize) + 1);
             messageHistory.push(message)
             localStorage.setItem('chatgpt-messages', JSON.stringify(messageHistory));
@@ -992,13 +1179,16 @@
                 }, 0);
             });
         },
+        doForget: function(id){
+            localStorage.setItem('chatgpt-forget', id);
+            this.clearForgetAll();
+            this.appendForget(id);
+            this.dom.chatInput.focus();
+        },
         addEventForget: function(element){
             let that = this;
             element.querySelector('.chatgpt-actions-forget-icon').addEventListener('click', function(){
-                localStorage.setItem('chatgpt-forget', this.dataset.id);
-                that.clearForgetAll();
-                that.appendForget(this.dataset.id);
-                that.dom.chatInput.focus();
+                that.doForget(this.dataset.id);
             });
         },
         appendForget: function(id){
@@ -1069,17 +1259,27 @@
             this.dom.chatInput.value = '';
             return id;
         },
-        reply: function (message, timestamp) {
+        imageHtml: function(url){
+            url = this.def.image_proxy + encodeURIComponent(url);
+            return `<a href="${url}" target="_blank" style="margin: 10px; display: table"><img src="${url}" width="250"/></a>`;
+        },
+        reply: function (message, timestamp, imageUrl) {
             const replyElement = document.createElement('div');
             let welcomeHidden = '';
             if(message === this.def.language.welcome){
                 welcomeHidden = 'chatgpt-widget-hidden';
             }
 
-            message = this.parseMarkdownToHtml(message);
             let id = 'm' + timestamp;
             let time = this.formatTimestamp(timestamp);
-            let hidden = message === '' ? 'chatgpt-widget-hidden' : '';
+            let hidden = '';
+            if(imageUrl){
+                message = this.imageHtml(imageUrl);
+                welcomeHidden = 'chatgpt-widget-hidden';
+            }else{
+                message = this.parseMarkdownToHtml(message);
+                hidden = message === '' ? 'chatgpt-widget-hidden' : '';
+            }
             let chatMessageHtml = this.getChatMessageHtml(id, message, time, hidden, welcomeHidden);
             replyElement.className = 'chatgpt-widget-flex chatgpt-widget-justify-start chatgpt-widget-mb-3';
             replyElement.dataset.id = id;
@@ -1236,7 +1436,7 @@
                     if (chatMessagesHistory[key].role === 'user') {
                         this.ask(chatMessagesHistory[key].content, chatMessagesHistory[key].time);
                     } else if (chatMessagesHistory[key].role === 'assistant') {
-                        this.reply(chatMessagesHistory[key].content, chatMessagesHistory[key].time);
+                        this.reply(chatMessagesHistory[key].content, chatMessagesHistory[key].time, chatMessagesHistory[key].image_url);
                     }
                     lastTimestamp = chatMessagesHistory[key].time || new Date().getTime();
                     if('m' + chatMessagesHistory[key].time === forgetId){
